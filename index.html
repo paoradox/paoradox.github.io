@@ -45,52 +45,18 @@
             </div>
         </section>
         <section class="py-6 py-xl-5">
-            <div class="container">
+            <div class="container" style="transition: none;">
                 <h2>Projects</h2>
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 py-5 projects">
-                    <div class="col"><a href="#" target="_blank">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_qs5jx2qs5jx2qs5j.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
-                    <div class="col"><a href="#" target="_blank">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_qs5jx2qs5jx2qs5j.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
-                    <div class="col"><a href="#" target="_blank">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_qs5jx2qs5jx2qs5j.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
-                    <div class="col"><a href="#">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_y80wzwy80wzwy80w.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
-                    <div class="col"><a href="#" target="_blank">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_y80wzwy80wzwy80w.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
-                    <div class="col"><a href="#" target="_blank">
-                            <div class="card"><img class="img-fluid card-img w-100 d-block" width="1376" height="768" src="assets/img/Gemini_Generated_Image_y80wzwy80wzwy80w.png">
-                                <div class="card-img-overlay">
-                                    <p>Paragraph</p>
-                                </div>
-                            </div>
-                        </a></div>
+
+                <!-- Projects Grid -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 py-5 projects" id="projectsGrid">
+                    <!-- Items injected by JS -->
                 </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Projects pagination">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
             </div>
         </section>
     </main>
@@ -115,6 +81,7 @@
     </footer>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/script.min.js"></script>
+    <script src="assets/js/projects.js"></script>
 </body>
 
 </html>
