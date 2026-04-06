@@ -25,13 +25,15 @@
 </head>
 
 <body>
-    <header class="d-flex flex-row"><!-- Start: Parallax Background -->
-        <div data-bss-parallax-bg="true" style="height: 470px;background-image: url(&quot;assets/img/header.png&quot;);background-position: center;background-size: cover;width: 1400px;">
+    <header class="d-flex flex-row" style="overflow: hidden;">
+        <!-- Start: Parallax Background -->
+        <div data-bss-parallax-bg="true" style="height: 470px; background-image: url('assets/img/header.png'); background-position: center; background-size: cover; width: 100%; min-width: 100%;">
             <div class="container d-flex flex-column justify-content-end align-items-start">
                 <h1 class="display-6 fw-bold">JP Ancheta Javier</h1>
                 <p class="fs-2 text-info mb-5 text-badge">IT Support</p>
             </div>
-        </div><!-- End: Parallax Background -->
+        </div>
+        <!-- End: Parallax Background -->
     </header>
     <main>
         <section class="py-4 py-xl-5">
