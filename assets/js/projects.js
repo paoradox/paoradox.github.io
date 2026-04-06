@@ -20,21 +20,21 @@ function getTotalPages() {
 }
 
 function renderProjects(page) {
-  const grid = document.getElementById("projectsGrid");
+  const grid = document.getElementById('projectsGrid');
   const start = (page - 1) * ITEMS_PER_PAGE;
   const slice = projectIds.slice(start, start + ITEMS_PER_PAGE);
 
-  grid.innerHTML = slice
-    .map(
-      (id) => `
-        <div class="col">
-          <div class="ratio ratio-16x9">
-            <iframe src="https://www.behance.net/embed/project/${id}?ilo0=1" allowfullscreen></iframe>
-          </div>
-        </div>
-      `,
-    )
-    .join("");
+  grid.innerHTML = slice.map(id => `
+    <div class="col">
+      <div class="ratio ratio-16x9" style="overflow: hidden;">
+        <iframe 
+          src="https://www.behance.net/embed/project/${id}?ilo0=1" 
+          allowfullscreen
+          style="border: 0; width: 110%; height: 108%; margin: 0 0 -8% -5%;"
+        ></iframe>
+      </div>
+    </div>
+  `).join('');
 }
 
 function renderPagination(page) {
