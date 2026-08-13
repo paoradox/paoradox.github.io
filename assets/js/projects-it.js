@@ -1,6 +1,7 @@
 (function () {
   const repos = {
     "Python-Video-Downloader": "Youtube Playlist Downloader",
+    "QoL-Scripts": "Quality of Life (QoL) Scripts",
     "Python-Image-Resizer": "Image Resizing Tool",
     "Python-Generate-QR": "QR Generation Tool",
     "Python-Tor-Traffic-Stealth": "Tor Browser Net Traffic Stealth Tool",
