@@ -11,127 +11,13 @@
     let viewCountElement = null;
     let viewsLabelElement = null;
     let retryAttempts = 0;
-    const MAX_RETRIES = 10;
+    const MAX_RETRIES = 5;
 
     const CONFIG = {
         PAGE_URL: 'https://paoradox.github.io/',
         BADGE_URL: 'https://librecounter.org/counter.svg',
         FALLBACK_KEY: 'paoradox_fallback_count'
     };
-
-    /**
-     * Fetch the SVG badge using an image element
-     * This avoids CORS because images are allowed cross-origin
-     */
-    function fetchCount() {
-        console.log('🌐 Fetching count from LibreCounter via image...');
-
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous'; // Try to get CORS access
-            img.src = CONFIG.BADGE_URL + '?ref=' + encodeURIComponent(CONFIG.PAGE_URL);
-            
-            // Set a timeout in case the image takes too long
-            const timeout = setTimeout(() => {
-                img.onload = null;
-                img.onerror = null;
-                reject(new Error('Image load timeout'));
-            }, 10000);
-
-            img.onload = function() {
-                clearTimeout(timeout);
-                console.log('📊 Image loaded successfully');
-                
-                try {
-                    // Draw the SVG on a canvas to extract text
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Set canvas size to match image
-                    canvas.width = img.naturalWidth || 200;
-                    canvas.height = img.naturalHeight || 50;
-                    
-                    // Draw image on canvas
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Extract text from the canvas
-                    // This is a best-effort approach - SVG text rendering may vary
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const data = imageData.data;
-                    
-                    // Try to recognize numbers by looking for patterns
-                    // This is a simplified approach - for production, OCR would be needed
-                    // Instead, we'll use a different method: fetch the SVG as text via proxy
-                    // Since we can't read the SVG directly, we'll use the image as a "visit trigger"
-                    // and then use a separate method to get the count
-                    
-                    // Fallback: try to get the count from the image URL or use cached
-                    console.log('📊 Image loaded, but text extraction from canvas is complex');
-                    resolve(null);
-                } catch (error) {
-                    console.warn('⚠️ Canvas extraction failed:', error.message);
-                    resolve(null);
-                }
-            };
-
-            img.onerror = function() {
-                clearTimeout(timeout);
-                console.warn('⚠️ Image failed to load');
-                reject(new Error('Image load failed'));
-            };
-        }).catch(error => {
-            console.warn('⚠️ Image-based fetch failed:', error.message);
-            return null;
-        });
-    }
-
-    /**
-     * Alternative: Use a proxy to fetch the SVG as text
-     * This avoids CORS by using a CORS proxy
-     */
-    function fetchCountViaProxy() {
-        console.log('🌐 Fetching count via CORS proxy...');
-        
-        // Use a public CORS proxy
-        const proxyUrl = 'https://api.allorigins.win/raw?url=' + 
-            encodeURIComponent(CONFIG.BADGE_URL + '?ref=' + encodeURIComponent(CONFIG.PAGE_URL));
-        
-        return fetch(proxyUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(svgText => {
-                console.log('📊 SVG received via proxy, parsing for count...');
-                
-                // Parse the SVG to find the count
-                const match = svgText.match(/<text[^>]*>([\d,]+)<\/text>/);
-                if (match) {
-                    const count = parseInt(match[1].replace(/,/g, ''), 10);
-                    if (!isNaN(count) && count >= 0) {
-                        console.log(`📊 LibreCounter returned: ${count}`);
-                        return count;
-                    }
-                }
-                
-                const numberMatch = svgText.match(/(\d[\d,]*)/);
-                if (numberMatch) {
-                    const count = parseInt(numberMatch[1].replace(/,/g, ''), 10);
-                    if (!isNaN(count) && count >= 0) {
-                        console.log(`📊 LibreCounter returned (fallback): ${count}`);
-                        return count;
-                    }
-                }
-                
-                throw new Error('Could not parse count from SVG');
-            })
-            .catch(error => {
-                console.warn('⚠️ Proxy fetch failed:', error.message);
-                return null;
-            });
-    }
 
     /**
      * Trigger a visit counter using an image
@@ -151,6 +37,82 @@
                 img.parentNode.removeChild(img);
             }
         }, 2000);
+    }
+
+    /**
+     * Alternative: Use a CORS proxy to fetch the SVG as text
+     * Try multiple proxies in case one fails
+     */
+    function fetchCountViaProxy() {
+        console.log('🌐 Fetching count via CORS proxy...');
+        
+        const url = CONFIG.BADGE_URL + '?ref=' + encodeURIComponent(CONFIG.PAGE_URL);
+        
+        // Try different proxies
+        const proxies = [
+            'https://corsproxy.io/?url=' + encodeURIComponent(url),
+            'https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(url)
+        ];
+        
+        // Try the first proxy
+        return fetch(proxies[0])
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(svgText => {
+                console.log('📊 SVG received via proxy, parsing for count...');
+                return parseSVGForCount(svgText);
+            })
+            .catch(error => {
+                console.warn('⚠️ First proxy failed:', error.message);
+                // Try the second proxy
+                console.log('🔄 Trying second proxy...');
+                return fetch(proxies[1])
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(svgText => {
+                        console.log('📊 SVG received via second proxy, parsing for count...');
+                        return parseSVGForCount(svgText);
+                    })
+                    .catch(error2 => {
+                        console.warn('⚠️ All proxies failed:', error2.message);
+                        return null;
+                    });
+            });
+    }
+
+    /**
+     * Parse SVG text to extract the count
+     */
+    function parseSVGForCount(svgText) {
+        // Look for text elements with numbers
+        const match = svgText.match(/<text[^>]*>([\d,]+)<\/text>/);
+        if (match) {
+            const count = parseInt(match[1].replace(/,/g, ''), 10);
+            if (!isNaN(count) && count >= 0) {
+                console.log(`📊 Parsed count: ${count}`);
+                return count;
+            }
+        }
+        
+        // Fallback: look for any number in the SVG
+        const numberMatch = svgText.match(/(\d[\d,]*)/);
+        if (numberMatch) {
+            const count = parseInt(numberMatch[1].replace(/,/g, ''), 10);
+            if (!isNaN(count) && count >= 0) {
+                console.log(`📊 Parsed count (fallback): ${count}`);
+                return count;
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -199,7 +161,7 @@
         console.log(`🔄 Attempting to fetch count (attempt ${retryAttempts + 1})...`);
 
         if (retryAttempts >= MAX_RETRIES) {
-            console.warn('⚠️ Max retries reached, using fallback');
+            console.warn('⚠️ Max retries reached, using cached fallback');
             const cached = localStorage.getItem(CONFIG.FALLBACK_KEY);
             if (cached) {
                 const count = parseInt(cached, 10);
@@ -214,7 +176,6 @@
             return;
         }
 
-        // Try the proxy method first
         fetchCountViaProxy().then(count => {
             if (count !== null && count >= 0) {
                 updateDisplay(count);
@@ -225,8 +186,8 @@
                 console.log(`✅ Successfully loaded count: ${count}`);
             } else {
                 retryAttempts++;
-                console.log(`⏳ Retrying in 2000ms...`);
-                setTimeout(updateCount, 2000);
+                console.log(`⏳ Retrying in 3000ms...`);
+                setTimeout(updateCount, 3000);
             }
         });
     }
@@ -274,7 +235,7 @@
         updateDisplay('…');
         updateLabel();
 
-        // Try cached count first
+        // Try cached count first (for immediate display)
         const cachedCount = localStorage.getItem(CONFIG.FALLBACK_KEY);
         if (cachedCount) {
             const count = parseInt(cachedCount, 10);
@@ -284,11 +245,13 @@
             }
         }
 
-        // Trigger the visit counter
+        // Trigger the visit counter (counts this visit)
         triggerVisitCounter();
 
-        // Fetch the count
-        updateCount();
+        // Try to fetch fresh count (will update if successful)
+        setTimeout(() => {
+            updateCount();
+        }, 1000);
 
         // Refresh when user returns to tab
         document.addEventListener('visibilitychange', function() {
@@ -300,7 +263,7 @@
             }
         });
 
-        console.log('✅ Views Counter initialized with LibreCounter (Image-based)');
+        console.log('✅ Views Counter initialized with LibreCounter');
     }
 
     initViewsCounter();

@@ -44,7 +44,7 @@
                 "https://*.behance.net",
                 "https://behanceusercontent.com",
                 "https://*.behanceusercontent.com",
-                // 🔥 LibreCounter badge
+                // LibreCounter badge
                 "https://librecounter.org"
             ].join(' '),
             
@@ -59,8 +59,9 @@
                 "https://github.com",
                 "https://*.github.com",
                 "https://api.github.com",
-                // 🔥 CORS proxy for LibreCounter
-                "https://api.allorigins.win"
+                // 🔥 CORS proxies for LibreCounter
+                "https://corsproxy.io",
+                "https://thingproxy.freeboard.io"
             ].join(' '),
             
             // Frame sources (embeds)
@@ -89,7 +90,7 @@
         ].join('; ');
         
         document.head.appendChild(meta);
-        console.log('🔒 CSP applied (production) - Behance + GitHub + LibreCounter supported');
+        console.log('🔒 CSP applied (production) - Behance + GitHub + LibreCounter + Proxies supported');
     }
 
     if (!enforceHTTPS()) {
