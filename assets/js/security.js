@@ -26,35 +26,43 @@
         }
 
         const domains = {
+            // Image sources (thumbnails, avatars, icons, badges)
             images: [
                 "'self'",
                 "data:",
                 "https://raw.githubusercontent.com",
                 "https://cdn.cdnlogo.com",
                 "https://upload.wikimedia.org",
+                // Behance
                 "https://behance.net",
                 "https://*.behance.net",
                 "https://behanceusercontent.com",
                 "https://*.behanceusercontent.com",
+                // GitHub
                 "https://github.com",
                 "https://*.github.com",
                 "https://avatars.githubusercontent.com",
-                "https://github.githubassets.com"
+                "https://github.githubassets.com",
+                // 🔥 LibreCounter badge
+                "https://librecounter.org"
             ].join(' '),
             
+            // API/Connect sources
             connects: [
                 "'self'",
-                "https://komarev.com",
+                // Behance API
                 "https://behance.net",
                 "https://*.behance.net",
                 "https://api.behance.net",
+                // GitHub API
                 "https://github.com",
                 "https://*.github.com",
                 "https://api.github.com",
-                // 🔥 ADD CountAPI to allowed connections
-                "https://api.countapi.xyz"
+                // 🔥 LibreCounter API
+                "https://librecounter.org"
             ].join(' '),
             
+            // Frame sources (embeds)
             frames: [
                 "'self'",
                 "https://behance.net",
@@ -80,7 +88,7 @@
         ].join('; ');
         
         document.head.appendChild(meta);
-        console.log('🔒 CSP applied (production) - Behance + GitHub + CountAPI supported');
+        console.log('🔒 CSP applied (production) - Behance + GitHub + LibreCounter supported');
     }
 
     if (!enforceHTTPS()) {

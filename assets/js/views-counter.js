@@ -1,50 +1,103 @@
 /**
- * Profile Views Counter - CountAPI Integration
- * Simple, free, and reliable visitor counter
+ * Profile Views Counter - LibreCounter Integration
+ * Uses LibreCounter's SVG badge to display visitor count
+ * Privacy-focused, cookie-free, and GDPR compliant
  */
 (function() {
     'use strict';
 
-    console.log('🔍 Views Counter: Starting with CountAPI...');
+    console.log('🔍 Views Counter: Starting with LibreCounter...');
 
     let viewCountElement = null;
     let viewsLabelElement = null;
+    let retryAttempts = 0;
+    const MAX_RETRIES = 10;
 
+    // LibreCounter configuration
     const CONFIG = {
-        // CountAPI endpoint - free, no CORS issues
-        COUNT_API_URL: 'https://api.countapi.xyz/hit/paoradox/portfolio',
+        // Your page URL - LibreCounter uses this as the unique identifier
+        // ⚠️ Replace this with your actual GitHub Pages URL
+        PAGE_URL: 'https://paoradox.github.io/',
+        // The SVG badge URL
+        BADGE_URL: 'https://librecounter.org/counter.svg',
         FALLBACK_KEY: 'paoradox_fallback_count'
     };
 
     /**
-     * Fetch the count from CountAPI
+     * Fetch the SVG badge and extract the count
      */
     function fetchCount() {
-        console.log('🌐 Fetching count from CountAPI...');
+        console.log('🌐 Fetching count from LibreCounter...');
         
-        return fetch(CONFIG.COUNT_API_URL, {
+        // Use fetch to get the SVG content
+        return fetch(CONFIG.BADGE_URL, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json'
-            }
+                'Accept': 'image/svg+xml'
+            },
+            // Important: Send the referrer so LibreCounter knows which page
+            referrer: CONFIG.PAGE_URL,
+            referrerPolicy: 'unsafe-url'
         })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            return response.json();
+            return response.text();
         })
-        .then(data => {
-            if (data && typeof data.value === 'number') {
-                console.log(`📊 CountAPI returned: ${data.value}`);
-                return data.value;
+        .then(svgText => {
+            console.log(`📊 SVG received, parsing for count...`);
+            
+            // Parse the SVG to find the count
+            // LibreCounter SVG typically has text elements with the count
+            // Example: <text>123</text> or similar
+            const match = svgText.match(/<text[^>]*>([\d,]+)<\/text>/);
+            if (match) {
+                const count = parseInt(match[1].replace(/,/g, ''), 10);
+                if (!isNaN(count) && count >= 0) {
+                    console.log(`📊 LibreCounter returned: ${count}`);
+                    return count;
+                }
             }
-            throw new Error('Invalid response from CountAPI');
+            
+            // Fallback: look for any number in the SVG
+            const numberMatch = svgText.match(/(\d[\d,]*)/);
+            if (numberMatch) {
+                const count = parseInt(numberMatch[1].replace(/,/g, ''), 10);
+                if (!isNaN(count) && count >= 0) {
+                    console.log(`📊 LibreCounter returned (fallback): ${count}`);
+                    return count;
+                }
+            }
+            
+            throw new Error('Could not parse count from SVG');
         })
         .catch(error => {
-            console.warn('⚠️ CountAPI fetch failed:', error.message);
+            console.warn('⚠️ LibreCounter fetch failed:', error.message);
             return null;
         });
+    }
+
+    /**
+     * Alternative: Use an image element to trigger the counter
+     * This ensures the visit is counted even if the SVG parsing fails
+     */
+    function triggerVisitCounter() {
+        console.log('📊 Triggering visit counter via image...');
+        const img = document.createElement('img');
+        img.src = CONFIG.BADGE_URL + '?ref=' + encodeURIComponent(CONFIG.PAGE_URL);
+        img.style.display = 'none';
+        img.setAttribute('referrerpolicy', 'unsafe-url');
+        document.body.appendChild(img);
+        
+        // Remove the image after it loads (cleanup)
+        img.onload = function() {
+            setTimeout(() => {
+                if (img.parentNode) {
+                    img.parentNode.removeChild(img);
+                }
+            }, 1000);
+        };
     }
 
     /**
@@ -63,7 +116,7 @@
     }
 
     /**
-     * Update label
+     * Update label and tooltip
      */
     function updateLabel() {
         if (viewsLabelElement) {
@@ -84,6 +137,44 @@
             void viewCountElement.offsetWidth;
             viewCountElement.classList.add('terminal-counter-pulse');
         }
+    }
+
+    /**
+     * Main function to fetch and update the count with retry logic
+     */
+    function updateCount() {
+        console.log(`🔄 Attempting to fetch count (attempt ${retryAttempts + 1})...`);
+
+        if (retryAttempts >= MAX_RETRIES) {
+            console.warn('⚠️ Max retries reached, using fallback');
+            const cached = localStorage.getItem(CONFIG.FALLBACK_KEY);
+            if (cached) {
+                const count = parseInt(cached, 10);
+                if (!isNaN(count) && count >= 0) {
+                    updateDisplay(count);
+                } else {
+                    updateDisplay('0');
+                }
+            } else {
+                updateDisplay('0');
+            }
+            return;
+        }
+
+        fetchCount().then(count => {
+            if (count !== null && count >= 0) {
+                updateDisplay(count);
+                localStorage.setItem(CONFIG.FALLBACK_KEY, String(count));
+                if (retryAttempts === 0) {
+                    triggerPulse();
+                }
+                console.log(`✅ Successfully loaded count: ${count}`);
+            } else {
+                retryAttempts++;
+                console.log(`⏳ Retrying in 2000ms...`);
+                setTimeout(updateCount, 2000);
+            }
+        });
     }
 
     /**
@@ -131,7 +222,7 @@
         updateDisplay('…');
         updateLabel();
 
-        // Try to get count from localStorage first (for speed)
+        // Try cached count first
         const cachedCount = localStorage.getItem(CONFIG.FALLBACK_KEY);
         if (cachedCount) {
             const count = parseInt(cachedCount, 10);
@@ -141,46 +232,24 @@
             }
         }
 
-        // Fetch from CountAPI
-        fetchCount().then(count => {
-            if (count !== null && count >= 0) {
-                updateDisplay(count);
-                // Store in localStorage as fallback
-                localStorage.setItem(CONFIG.FALLBACK_KEY, String(count));
-                triggerPulse();
-                console.log(`✅ Successfully loaded count: ${count}`);
-            } else {
-                // If fetch fails, use cached or show 0
-                const cached = localStorage.getItem(CONFIG.FALLBACK_KEY);
-                if (cached) {
-                    const cachedCount = parseInt(cached, 10);
-                    if (!isNaN(cachedCount) && cachedCount >= 0) {
-                        updateDisplay(cachedCount);
-                        console.log(`📦 Using cached fallback: ${cachedCount}`);
-                    } else {
-                        updateDisplay('0');
-                    }
-                } else {
-                    updateDisplay('0');
-                }
-                console.warn('⚠️ Using fallback count');
-            }
-        });
+        // Trigger the visit counter (so LibreCounter counts this visit)
+        triggerVisitCounter();
+
+        // Fetch the count from LibreCounter
+        updateCount();
 
         // Refresh when user returns to tab
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
                 console.log('👁️ Tab visible, refreshing count...');
-                fetchCount().then(count => {
-                    if (count !== null && count >= 0) {
-                        updateDisplay(count);
-                        localStorage.setItem(CONFIG.FALLBACK_KEY, String(count));
-                    }
-                });
+                retryAttempts = 0;
+                // Trigger another visit counter
+                triggerVisitCounter();
+                updateCount();
             }
         });
 
-        console.log('✅ Views Counter initialized with CountAPI');
+        console.log('✅ Views Counter initialized with LibreCounter');
     }
 
     // Start the counter
