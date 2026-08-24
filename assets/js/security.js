@@ -26,11 +26,55 @@
         const hostname = window.location.hostname;
         const isLocal = ['localhost', '127.0.0.1'].includes(hostname) || hostname.startsWith('192.168.');
         
-        // Only apply CSP in production
         if (isLocal) {
             console.log('🔓 CSP disabled (development mode)');
             return;
         }
+
+        // Centralized domain lists for maintainability
+        const domains = {
+            // Image sources (thumbnails, avatars, icons)
+            images: [
+                "'self'",
+                "data:",
+                "https://raw.githubusercontent.com",
+                "https://cdn.cdnlogo.com",
+                "https://upload.wikimedia.org",
+                // Behance
+                "https://behance.net",
+                "https://*.behance.net",
+                "https://behanceusercontent.com",
+                "https://*.behanceusercontent.com",
+                // GitHub
+                "https://github.com",
+                "https://*.github.com",
+                "https://avatars.githubusercontent.com",
+                "https://github.githubassets.com"
+            ].join(' '),
+            
+            // API/Connect sources
+            connects: [
+                "'self'",
+                "https://komarev.com",
+                // Behance API
+                "https://behance.net",
+                "https://*.behance.net",
+                "https://api.behance.net",
+                // GitHub API
+                "https://github.com",
+                "https://*.github.com",
+                "https://api.github.com"
+            ].join(' '),
+            
+            // Frame sources (embeds)
+            frames: [
+                "'self'",
+                "https://behance.net",
+                "https://*.behance.net",
+                "https://github.com",
+                "https://*.github.com"
+            ].join(' ')
+        };
 
         const meta = document.createElement('meta');
         meta.httpEquiv = 'Content-Security-Policy';
@@ -39,19 +83,18 @@
             "script-src 'self' 'unsafe-inline'",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: https://raw.githubusercontent.com https://cdn.cdnlogo.com https://upload.wikimedia.org",
-            "connect-src 'self' https://komarev.com",
-            "frame-src 'none'",
+            `img-src ${domains.images}`,
+            `connect-src ${domains.connects}`,
+            `frame-src ${domains.frames}`,
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'"
         ].join('; ');
         
         document.head.appendChild(meta);
-        console.log('🔒 CSP applied (production mode)');
+        console.log('🔒 CSP applied (production) - Behance + GitHub supported');
     }
 
-    // Initialize security measures
     if (!enforceHTTPS()) {
         applyCSP();
     }
