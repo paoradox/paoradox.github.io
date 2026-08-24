@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>JP Ancheta Javier's Portfolio</title>
 
+    <!-- Basic Security Headers (Safe for all environments) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta name="robots" content="index, follow">
+
+    <!-- ✅ Security Module - Load early in head -->
+    <script src="assets/js/security.js"></script>
+
     <!-- Open Graph / Facebook, LinkedIn, Discord, etc. -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://paoradox.github.io/">
@@ -32,13 +41,17 @@
     </script>
 
     <link rel="icon" type="image/png" sizes="438x446" href="assets/img/logo-round.png">
-    <link rel="icon" type="image/png" sizes="438x446" href="assets/img/logo-round.png">
-    <link rel="icon" type="image/png" sizes="438x446" href="assets/img/logo-round.png">
-    <link rel="icon" type="image/png" sizes="438x446" href="assets/img/logo-round.png">
-    <link rel="icon" type="image/png" sizes="438x446" href="assets/img/logo-round.png">
+
+    <!-- Bootstrap CSS (Local) -->
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:300,400,500,600,700&amp;display=swap">
+
+    <!-- Font Awesome (Local) -->
     <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:300,400,500,600,700&amp;display=swap">
+    
+    <!-- Local Stylesheets -->
     <link rel="stylesheet" href="assets/css/styles.min.css">
     <link rel="stylesheet" href="assets/css/terminal.css">
     <link rel="stylesheet" href="assets/css/tools-marquee.css">
@@ -79,7 +92,7 @@
                         style="cursor: pointer; background-color: transparent; transition: background-color 0.2s ease;"
                         onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'"
                         onmouseout="this.style.backgroundColor='transparent'">
-                    <h2 class="mb-0 fs-3"><span class="terminal-prompt">├──</span>Multimedia_Projects<span class="terminal-prompt">/</span></h2>
+                    <h3 class="mb-0 fs-3"><span class="terminal-prompt">├──</span>Multimedia_Projects<span class="terminal-prompt">/</span></h3>
                     <span id="multimediaIcon" class="text-primary fs-4" aria-hidden="true" style="display: inline-block; transition: transform 0.2s ease;">&#x25BC;</span>
                 </button>
 
@@ -106,7 +119,7 @@
                         aria-expanded="false"
                         aria-controls="techCollapse"
                         style="cursor: pointer; background-color: transparent; transition: background-color 0.2s ease;">
-                    <h2 class="mb-0 fs-3"><span class="terminal-prompt">└──</span>Tech_Projects<span class="terminal-prompt">/</span></h2>
+                    <h3 class="mb-0 fs-3"><span class="terminal-prompt">└──</span>Tech_Projects<span class="terminal-prompt">/</span></h3>
                     <span id="techIcon" class="text-primary fs-4" aria-hidden="true" style="display: inline-block; transition: transform 0.2s ease;">&#x25BC;</span>
                 </button>
 
