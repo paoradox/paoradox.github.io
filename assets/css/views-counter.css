@@ -1,5 +1,6 @@
 /* Views Counter - Component Styles */
 /* Font inherited from styles.min.css (Fira Code) */
+/* Terminal styles inherited from terminal.css */
 
 .views-counter {
     position: fixed;
@@ -31,10 +32,21 @@
     min-width: 30px;
     display: inline-block;
     text-align: center;
+    transition: color 0.3s ease;
+}
+
+/* Apply terminal counter blink to the number */
+.views-counter #viewCount.terminal-counter-blink {
+    animation: blink 1s step-end infinite;
+}
+
+/* Apply terminal pulse on update */
+.views-counter #viewCount.terminal-counter-pulse {
+    animation: counterPulse 0.6s ease;
 }
 
 .views-counter .views-label {
-    color: #02aaff;  /* Changed to match IT_Support */
+    color: #02aaff;
     font-size: 0.8rem;
     margin-left: 2px;
 }
@@ -60,31 +72,6 @@
 .views-counter:hover .views-tooltip {
     opacity: 1;
     transform: translateY(0);
-}
-
-/* Pulse animation for new view */
-@keyframes viewsPulse {
-    0% {
-        transform: scale(1);
-    }
-    25% {
-        transform: scale(1.15);
-        color: #02aaff;
-    }
-    50% {
-        transform: scale(1);
-    }
-    75% {
-        transform: scale(1.05);
-        color: #02aaff;
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.views-counter.pulse #viewCount {
-    animation: viewsPulse 0.6s ease;
 }
 
 /* Responsive - smaller on mobile */

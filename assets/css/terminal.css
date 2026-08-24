@@ -41,3 +41,37 @@
 .terminal-border:hover {
     border-color: rgba(2, 170, 255, 0.6);
 }
+
+/* Terminal counter blink (like cursor but for numbers) */
+.terminal-counter-blink {
+    animation: blink 1s step-end infinite;
+    color: #02aaff;
+}
+
+/* Terminal pulse for counter updates */
+.terminal-counter-pulse {
+    animation: counterPulse 0.6s ease;
+}
+
+@keyframes counterPulse {
+    0% {
+        transform: scale(1);
+        color: #ffffff;
+    }
+    25% {
+        transform: scale(1.15);
+        color: #02aaff;
+    }
+    50% {
+        transform: scale(1);
+        color: #ffffff;
+    }
+    75% {
+        transform: scale(1.05);
+        color: #02aaff;
+    }
+    100% {
+        transform: scale(1);
+        color: #ffffff;
+    }
+}
