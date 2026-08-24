@@ -1,203 +1,102 @@
 /**
- * Profile Views Counter - Debug Version
- * Logs everything to help identify the issue
+ * Profile Views Counter - OpenCounterAPI Integration
+ * Works alongside OpenCounterAPI script to display visitor counts
  */
 (function() {
     'use strict';
 
-    console.log('🔍 Views Counter: Script starting...');
-
-    const CONFIG = {
-        KOMAREV_URL: 'https://komarev.com/ghpvc/?username=paoradox&label=Profile%20views&color=blueviolet&style=for-the-badge',
-        VIEWS_KEY: 'paoradox_views_count',
-        OFFSET_KEY: 'paoradox_views_offset',
-        LAST_VIEW_KEY: 'paoradox_last_view_time',
-        COOLDOWN_HOURS: 24,
-        SESSION_FLAG: 'paoradox_view_counted_session',
-        MAX_VIEWS: 1000000000,
-        MAX_OFFSET: 1000000
-    };
+    console.log('🔍 Views Counter: Starting with OpenCounterAPI...');
 
     let viewCountElement = null;
     let viewsLabelElement = null;
+    let openCounterReady = false;
+    let retryAttempts = 0;
+    const MAX_RETRIES = 20;
 
-    function getNow() {
-        return Date.now();
-    }
-
-    function getStorageItem(key, fallback = null) {
-        try {
-            const value = localStorage.getItem(key);
-            console.log(`📦 getStorageItem("${key}") →`, value);
-            return value !== null ? value : fallback;
-        } catch (e) {
-            console.warn('Views Counter: localStorage unavailable', e);
-            return fallback;
-        }
-    }
-
-    function setStorageItem(key, value) {
-        try {
-            localStorage.setItem(key, String(value));
-            console.log(`💾 setStorageItem("${key}", "${value}")`);
-            return true;
-        } catch (e) {
-            console.warn('Views Counter: Failed to save to localStorage', e);
-            return false;
-        }
-    }
-
-    function validateNumber(value, max, fallback) {
-        const num = parseInt(value, 10);
-        if (isNaN(num) || num < 0 || num > max) {
-            console.log(`⚠️ validateNumber: "${value}" → fallback ${fallback}`);
-            return fallback;
-        }
-        return num;
-    }
-
-    function getLocalOffset() {
-        const stored = getStorageItem(CONFIG.OFFSET_KEY, '0');
-        const result = validateNumber(stored, CONFIG.MAX_OFFSET, 0);
-        console.log(`📊 getLocalOffset() → ${result}`);
-        return result;
-    }
-
-    function setLocalOffset(offset) {
-        const validOffset = validateNumber(offset, CONFIG.MAX_OFFSET, 0);
-        setStorageItem(CONFIG.OFFSET_KEY, validOffset);
-        console.log(`📊 setLocalOffset() → ${validOffset}`);
-    }
-
-    function sessionCounted() {
-        const result = getStorageItem(CONFIG.SESSION_FLAG, 'false') === 'true';
-        console.log(`🔑 sessionCounted() → ${result}`);
-        return result;
-    }
-
-    function markSessionCounted() {
-        setStorageItem(CONFIG.SESSION_FLAG, 'true');
-        console.log(`🔑 markSessionCounted() done`);
-    }
-
-    function canIncrement() {
-        const lastView = getStorageItem(CONFIG.LAST_VIEW_KEY, null);
-        console.log(`⏰ canIncrement: lastView = ${lastView}`);
-        
-        // First visit ever - allow increment
-        if (lastView === null) {
-            console.log('⏰ First visit ever! Allowing increment.');
-            return true;
-        }
-        
-        const lastTime = validateNumber(lastView, Date.now(), 0);
-        const now = getNow();
-
-        if (lastTime === 0) {
-            console.log('⏰ lastTime is 0, allowing increment');
-            return true;
-        }
-
-        const hoursSince = (now - lastTime) / (1000 * 60 * 60);
-        const canInc = hoursSince >= CONFIG.COOLDOWN_HOURS;
-        console.log(`⏰ Hours since last view: ${hoursSince.toFixed(2)}, can increment: ${canInc}`);
-        return canInc;
-    }
-
-    function tryIncrementOffset() {
-        console.log('🔄 tryIncrementOffset() called');
-        
-        if (sessionCounted()) {
-            console.log('🔄 Session already counted, skipping');
-            return false;
-        }
-        
-        if (!canIncrement()) {
-            console.log('🔄 Cannot increment (cooldown active)');
-            return false;
-        }
-
-        const currentOffset = getLocalOffset();
-        if (currentOffset >= CONFIG.MAX_OFFSET) {
-            console.warn('Views Counter: Maximum offset reached');
-            return false;
-        }
-        
-        const newOffset = currentOffset + 1;
-        setLocalOffset(newOffset);
-        setStorageItem(CONFIG.LAST_VIEW_KEY, String(getNow()));
-        markSessionCounted();
-        console.log(`🔄 Incremented! New offset: ${newOffset}`);
-        return true;
-    }
-
-    function fetchGlobalCount() {
-        console.log('🌐 fetchGlobalCount() called, URL:', CONFIG.KOMAREV_URL);
-        
-        return fetch(CONFIG.KOMAREV_URL, {
-            method: 'GET',
-            headers: { 'Accept': 'image/svg+xml,text/html' }
-        })
-        .then(response => {
-            console.log('🌐 Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    /**
+     * Try to get the count from OpenCounterAPI's data-placeholder elements
+     */
+    function getCountFromOpenCounter() {
+        // OpenCounterAPI stores data in elements with data-placeholder
+        // We'll use the "now" (current visitors) as our primary count
+        const nowElement = document.querySelector('[data-placeholder="now"]');
+        if (nowElement) {
+            const value = parseInt(nowElement.textContent, 10);
+            if (!isNaN(value) && value >= 0) {
+                console.log(`📊 OpenCounterAPI 'now' value: ${value}`);
+                return value;
             }
-            return response.text();
-        })
-        .then(svgText => {
-            console.log('🌐 Response length:', svgText.length);
-            console.log('🌐 First 100 chars:', svgText.substring(0, 100));
-            
-            if (!svgText || !svgText.includes('<svg')) {
-                console.warn('Views Counter: Invalid SVG response');
-                return null;
-            }
+        }
 
-            // Find any number in the SVG
-            const numberMatch = svgText.match(/(\d[\d,]*)/);
-            if (numberMatch) {
-                const number = parseInt(numberMatch[1].replace(/,/g, ''), 10);
-                console.log(`🌐 Found number: ${number}`);
-                if (!isNaN(number) && number > 0) {
-                    return validateNumber(number, CONFIG.MAX_VIEWS, null);
-                }
+        // Fallback: try "24h" (today's visitors)
+        const todayElement = document.querySelector('[data-placeholder="24h"]');
+        if (todayElement) {
+            const value = parseInt(todayElement.textContent, 10);
+            if (!isNaN(value) && value >= 0) {
+                console.log(`📊 OpenCounterAPI '24h' value: ${value}`);
+                return value;
             }
+        }
 
-            console.warn('Views Counter: No valid number found in SVG');
-            return null;
-        })
-        .catch(error => {
-            console.warn('🌐 Fetch error:', error.message);
-            return null;
-        });
+        // Fallback: try "month" (monthly visitors)
+        const monthElement = document.querySelector('[data-placeholder="month"]');
+        if (monthElement) {
+            const value = parseInt(monthElement.textContent, 10);
+            if (!isNaN(value) && value >= 0) {
+                console.log(`📊 OpenCounterAPI 'month' value: ${value}`);
+                return value;
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Check if OpenCounterAPI is loaded and has data
+     */
+    function isOpenCounterReady() {
+        // Check if the script has been loaded and has populated the placeholders
+        const nowElement = document.querySelector('[data-placeholder="now"]');
+        if (nowElement) {
+            const value = parseInt(nowElement.textContent, 10);
+            if (!isNaN(value) && value > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Update the display with the count
+     */
     function updateDisplay(count) {
         if (viewCountElement) {
             if (typeof count === 'number') {
                 viewCountElement.textContent = count.toLocaleString();
-                console.log(`🖥️ updateDisplay: ${count.toLocaleString()}`);
+                console.log(`🖥️ Display updated: ${count.toLocaleString()}`);
             } else {
                 viewCountElement.textContent = count;
-                console.log(`🖥️ updateDisplay: ${count}`);
+                console.log(`🖥️ Display updated: ${count}`);
             }
         }
     }
 
+    /**
+     * Update label and tooltip
+     */
     function updateLabel() {
         if (viewsLabelElement) {
             viewsLabelElement.textContent = 'views';
         }
-    }
-
-    function updateTooltip() {
         const tooltip = document.querySelector('.views-tooltip');
         if (tooltip) {
-            tooltip.textContent = 'Unique visits (24h cooldown)';
+            tooltip.textContent = 'Live visitor count';
         }
     }
 
+    /**
+     * Trigger pulse animation
+     */
     function triggerPulse() {
         if (viewCountElement) {
             viewCountElement.classList.remove('terminal-counter-pulse');
@@ -206,17 +105,67 @@
         }
     }
 
+    /**
+     * Main function to fetch and update the count
+     */
+    function updateCount() {
+        console.log(`🔄 Attempting to fetch count (attempt ${retryAttempts + 1})...`);
+
+        if (!isOpenCounterReady()) {
+            if (retryAttempts < MAX_RETRIES) {
+                retryAttempts++;
+                console.log(`⏳ OpenCounterAPI not ready yet, retrying in 500ms...`);
+                setTimeout(updateCount, 500);
+            } else {
+                console.warn('⚠️ OpenCounterAPI not ready after max retries');
+                // Show local fallback if available
+                const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
+                updateDisplay(localCount);
+                updateLabel();
+            }
+            return;
+        }
+
+        const count = getCountFromOpenCounter();
+        if (count !== null && count > 0) {
+            updateDisplay(count);
+            updateLabel();
+            openCounterReady = true;
+            
+            // Store as fallback
+            localStorage.setItem('paoradox_fallback_count', String(count));
+            
+            // Trigger pulse on first load
+            if (retryAttempts === 0) {
+                triggerPulse();
+            }
+            
+            console.log(`✅ Successfully loaded count: ${count}`);
+        } else {
+            console.warn('⚠️ Could not retrieve count from OpenCounterAPI');
+            if (retryAttempts < MAX_RETRIES) {
+                retryAttempts++;
+                setTimeout(updateCount, 500);
+            } else {
+                const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
+                updateDisplay(localCount);
+                updateLabel();
+            }
+        }
+    }
+
+    /**
+     * Initialize the views counter
+     */
     function initViewsCounter() {
-        console.log('🚀 initViewsCounter() called');
-        
         if (document.readyState === 'loading') {
-            console.log('📄 Document still loading, waiting for DOMContentLoaded');
             document.addEventListener('DOMContentLoaded', initViewsCounter);
             return;
         }
 
         console.log('📄 Document ready, creating counter...');
 
+        // Create or get the counter container
         let container = document.getElementById('viewsCounter');
         if (!container) {
             console.log('📄 Creating new counter container');
@@ -224,13 +173,13 @@
             container.id = 'viewsCounter';
             container.className = 'views-counter';
             container.setAttribute('role', 'status');
-            container.setAttribute('aria-label', 'Profile view counter');
+            container.setAttribute('aria-label', 'Live visitor counter');
 
             container.innerHTML = `
                 <span class="terminal-prompt">$</span>
                 <span id="viewCount" class="terminal-counter-blink">0</span>
                 <span class="views-label">views</span>
-                <span class="views-tooltip">Unique visits (24h cooldown)</span>
+                <span class="views-tooltip">Live visitor count</span>
             `;
 
             document.body.appendChild(container);
@@ -240,74 +189,62 @@
         viewsLabelElement = document.querySelector('.views-label');
 
         if (!viewCountElement) {
-            console.warn('Views Counter: viewCount element not found');
+            console.warn('❌ viewCount element not found');
             return;
         }
 
+        // Show loading state
         updateDisplay('…');
         updateLabel();
-        updateTooltip();
 
-        console.log('🔄 Attempting to increment offset...');
-        const didIncrement = tryIncrementOffset();
-        console.log(`🔄 didIncrement = ${didIncrement}`);
-
-        console.log('🌐 Fetching global count...');
-        fetchGlobalCount().then(globalCount => {
-            console.log(`🌐 Global count received: ${globalCount}`);
-            
-            if (globalCount !== null) {
-                const offset = getLocalOffset();
-                const totalCount = globalCount + offset;
-                updateDisplay(totalCount);
-                console.log(`✅ Total: ${globalCount} + ${offset} = ${totalCount}`);
-            } else {
-                const offset = getLocalOffset();
-                updateDisplay(offset || 0);
-                console.log(`⚠️ Using local-only: ${offset || 0}`);
-            }
-            
-            if (didIncrement) {
-                console.log('🎉 Triggering pulse animation!');
-                triggerPulse();
-            }
-        });
-
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                console.log('👁️ Tab became visible, refreshing...');
-                const canInc = !sessionCounted() && canIncrement();
-                let didInc = false;
-                if (canInc) {
-                    didInc = tryIncrementOffset();
+        // Check if OpenCounterAPI is already loaded
+        if (typeof OpenCounterAPI !== 'undefined' || document.querySelector('[data-placeholder]')) {
+            console.log('📊 OpenCounterAPI appears to be loaded');
+            updateCount();
+        } else {
+            console.log('⏳ Waiting for OpenCounterAPI to load...');
+            // Wait for the OpenCounterAPI script to load
+            let checkInterval = 0;
+            const maxCheck = 30; // 30 seconds max
+            const waitForOpenCounter = setInterval(() => {
+                checkInterval++;
+                if (document.querySelector('[data-placeholder="now"]') && 
+                    parseInt(document.querySelector('[data-placeholder="now"]').textContent, 10) > 0) {
+                    clearInterval(waitForOpenCounter);
+                    console.log('📊 OpenCounterAPI loaded successfully');
+                    updateCount();
+                } else if (checkInterval >= maxCheck) {
+                    clearInterval(waitForOpenCounter);
+                    console.warn('⚠️ OpenCounterAPI did not load within timeout');
+                    const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
+                    updateDisplay(localCount);
+                    updateLabel();
                 }
+            }, 1000);
+        }
 
-                fetchGlobalCount().then(globalCount => {
-                    if (globalCount !== null) {
-                        const offset = getLocalOffset();
-                        const totalCount = globalCount + offset;
-                        updateDisplay(totalCount);
-                    } else {
-                        const offset = getLocalOffset();
-                        updateDisplay(offset || 0);
-                    }
-                    
-                    if (didInc) {
-                        triggerPulse();
-                    }
-                });
+        // Refresh when user returns to tab
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && openCounterReady) {
+                console.log('👁️ Tab visible, refreshing count...');
+                updateCount();
             }
         });
 
-        console.log('✅ Views Counter initialized');
+        // Listen for OpenCounterAPI updates (if they trigger events)
+        document.addEventListener('openCounterUpdate', function(e) {
+            console.log('📊 OpenCounterAPI update event received');
+            if (e.detail && e.detail.count) {
+                updateDisplay(e.detail.count);
+            } else {
+                updateCount();
+            }
+        });
+
+        console.log('✅ Views Counter initialized with OpenCounterAPI');
     }
 
-    window.addEventListener('error', function(e) {
-        if (e.message && e.message.includes('Views Counter')) {
-            console.warn('⚠️ Views Counter caught error:', e.message);
-        }
-    });
-
+    // Start the counter
     initViewsCounter();
 
 })();
