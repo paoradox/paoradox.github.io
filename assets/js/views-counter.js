@@ -177,8 +177,8 @@
 
             container.innerHTML = `
                 <span class="terminal-prompt">$</span>
-                <span id="viewCount" class="terminal-counter-blink">0</span>
                 <span class="views-label">views</span>
+                <span id="viewCount" class="terminal-counter-blink">0</span>
                 <span class="views-tooltip">Live visitor count</span>
             `;
 
