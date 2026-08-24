@@ -30,7 +30,13 @@
             images: [
                 "'self'",
                 "data:",
+                // GitHub & Raw Content
                 "https://raw.githubusercontent.com",
+                "https://github.com",
+                "https://*.github.com",
+                "https://avatars.githubusercontent.com",
+                "https://github.githubassets.com",
+                // CDN & Logos
                 "https://cdn.cdnlogo.com",
                 "https://upload.wikimedia.org",
                 // Behance
@@ -38,11 +44,6 @@
                 "https://*.behance.net",
                 "https://behanceusercontent.com",
                 "https://*.behanceusercontent.com",
-                // GitHub
-                "https://github.com",
-                "https://*.github.com",
-                "https://avatars.githubusercontent.com",
-                "https://github.githubassets.com",
                 // 🔥 LibreCounter badge
                 "https://librecounter.org"
             ].join(' '),
@@ -58,8 +59,8 @@
                 "https://github.com",
                 "https://*.github.com",
                 "https://api.github.com",
-                // 🔥 LibreCounter API
-                "https://librecounter.org"
+                // 🔥 CORS proxy for LibreCounter
+                "https://api.allorigins.win"
             ].join(' '),
             
             // Frame sources (embeds)
