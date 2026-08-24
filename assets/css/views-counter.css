@@ -47,8 +47,8 @@
 
 .views-counter .views-label {
     color: #02aaff;
-    font-size: 0.8rem;
-    margin-left: 2px;
+    font-size: 0.95rem;
+    margin-right: 6px;
 }
 
 /* Tooltip - hidden by default, shown on hover */

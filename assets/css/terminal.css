@@ -20,32 +20,17 @@
     color: #02aaff;
 }
 
-/* Blink animation for cursor */
+/* Terminal counter blink - same as cursor but for numbers */
+.terminal-counter-blink {
+    animation: blink 1s step-end infinite;
+    color: #02aaff;
+}
+
+/* Blink animation for cursor and counter */
 @keyframes blink {
     50% {
         opacity: 0;
     }
-}
-
-/* Optional: Terminal text badge (for inline terminal-style text) */
-.terminal-text {
-    color: #02aaff;
-    font-family: inherit;
-}
-
-/* Optional: Terminal accent border */
-.terminal-border {
-    border-color: rgba(2, 170, 255, 0.3);
-}
-
-.terminal-border:hover {
-    border-color: rgba(2, 170, 255, 0.6);
-}
-
-/* Terminal counter blink (like cursor but for numbers) */
-.terminal-counter-blink {
-    animation: blink 1s step-end infinite;
-    color: #02aaff;
 }
 
 /* Terminal pulse for counter updates */
@@ -74,4 +59,19 @@
         transform: scale(1);
         color: #ffffff;
     }
+}
+
+/* Optional: Terminal text badge */
+.terminal-text {
+    color: #02aaff;
+    font-family: inherit;
+}
+
+/* Optional: Terminal accent border */
+.terminal-border {
+    border-color: rgba(2, 170, 255, 0.3);
+}
+
+.terminal-border:hover {
+    border-color: rgba(2, 170, 255, 0.6);
 }
