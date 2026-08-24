@@ -1,0 +1,66 @@
+/* Greetings Overlay - Terminal Style (Matrix Shuffle) */
+.greetings-overlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(2, 170, 255, 0.25);
+    border-radius: 10px;
+    padding: 14px 20px;
+    min-width: 200px;
+    max-width: 360px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    user-select: none;
+    cursor: default;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.3s ease;
+    text-align: center;
+}
+
+.greetings-overlay:hover {
+    border-color: rgba(2, 170, 255, 0.6);
+}
+
+/* The single line */
+.greetings-overlay .greeting-line {
+    min-height: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The text that shuffles */
+.greetings-overlay .greeting-text {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: #e0e0e0;
+    word-break: break-word;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .greetings-overlay {
+        top: 12px;
+        right: 12px;
+        padding: 10px 14px;
+        min-width: 140px;
+        max-width: 240px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+}
+
+/* Light theme support */
+[data-bs-theme="light"] .greetings-overlay {
+    background: rgba(20, 20, 30, 0.85);
+    border-color: rgba(2, 170, 255, 0.2);
+}
+
+[data-bs-theme="light"] .greetings-overlay:hover {
+    border-color: rgba(2, 170, 255, 0.5);
+}

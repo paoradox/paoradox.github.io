@@ -12,6 +12,42 @@ const projectIds = [
   177089863, 177089745, 177089605, 177088965, 177088003
 ];
 
+// --- Inject CSS for Multimedia Cards ---
+const multimediaCardStyles = document.createElement('style');
+multimediaCardStyles.textContent = `
+  /* Multimedia Projects Cards - Glow Effect */
+  .multimedia-card {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.4s ease, transform 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  .multimedia-card:hover {
+    border-color: rgba(2, 170, 255, 0.4) !important;
+    box-shadow: 0 0 30px rgba(2, 170, 255, 0.08), 0 0 60px rgba(2, 170, 255, 0.04);
+    transform: scale(1.01);
+  }
+
+  /* Light theme adjustment */
+  [data-bs-theme="light"] .multimedia-card {
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+
+  [data-bs-theme="light"] .multimedia-card:hover {
+    border-color: rgba(2, 170, 255, 0.3) !important;
+    box-shadow: 0 0 30px rgba(2, 170, 255, 0.06), 0 0 60px rgba(2, 170, 255, 0.03);
+  }
+
+  /* Ensure the iframe inside the card respects the glow */
+  .multimedia-card .ratio {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+`;
+document.head.appendChild(multimediaCardStyles);
+
 const ITEMS_PER_PAGE = 9;
 let currentPage = 1;
 
@@ -26,12 +62,14 @@ function renderProjects(page) {
 
   grid.innerHTML = slice.map(id => `
     <div class="col">
-      <div class="ratio ratio-16x9" style="overflow: hidden;">
-        <iframe 
-          src="https://www.behance.net/embed/project/${id}?ilo0=1" 
-          allowfullscreen
-          style="border: 0; width: 110%; height: 108%; margin: 0 0 -8% -5%;"
-        ></iframe>
+      <div class="multimedia-card">
+        <div class="ratio ratio-16x9" style="overflow: hidden;">
+          <iframe 
+            src="https://www.behance.net/embed/project/${id}?ilo0=1" 
+            allowfullscreen
+            style="border: 0; width: 110%; height: 108%; margin: 0 0 -8% -5%;"
+          ></iframe>
+        </div>
       </div>
     </div>
   `).join('');

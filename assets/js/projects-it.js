@@ -1,4 +1,31 @@
 (function () {
+  // --- Inject CSS for Tech Cards ---
+  const techCardStyles = document.createElement('style');
+  techCardStyles.textContent = `
+    /* Tech Projects Cards - Subtle White Border */
+    .tech-card {
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .tech-card:hover {
+      border-color: rgba(255, 255, 255, 0.25) !important;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
+    }
+
+    /* Light theme adjustment */
+    [data-bs-theme="light"] .tech-card {
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    }
+
+    [data-bs-theme="light"] .tech-card:hover {
+      border-color: rgba(0, 0, 0, 0.2) !important;
+    }
+  `;
+  document.head.appendChild(techCardStyles);
+
+  // --- Repo Data ---
   const repos = {
     "Python-Video-Downloader": "Youtube Playlist Downloader",
     "QoL-Scripts": "Quality of Life (QoL) Scripts",
@@ -40,7 +67,7 @@
     // add more as: "repo-slug": "Custom Display Name"
   };
 
-  const repoEntries = Object.entries(repos); // [["slug", "Display Name"], ...]
+  const repoEntries = Object.entries(repos);
 
   const ITEMS_PER_PAGE = 9;
   let currentPage = 1;
@@ -54,18 +81,18 @@
     const start = (page - 1) * ITEMS_PER_PAGE;
     const slice = repoEntries.slice(start, start + ITEMS_PER_PAGE);
 
-  grid.innerHTML = slice.map(([slug, displayName]) => `
-    <div class="col">
-      <div class="card h-100">
-        <div class="card-body d-flex flex-column">
-          <h6 class="card-title text-center" title="${displayName}">${displayName}</h6>
-          <a href="https://github.com/paoradox/${slug}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-auto">
-            Preview
-          </a>
+    grid.innerHTML = slice.map(([slug, displayName]) => `
+      <div class="col">
+        <div class="card h-100 tech-card">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title text-center" title="${displayName}">${displayName}</h6>
+            <a href="https://github.com/paoradox/${slug}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-auto">
+              Preview
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
   }
 
   function renderPagination(page) {
