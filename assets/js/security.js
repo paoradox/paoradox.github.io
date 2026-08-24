@@ -5,9 +5,6 @@
 (function() {
     'use strict';
 
-    /**
-     * Force HTTPS in production
-     */
     function enforceHTTPS() {
         const hostname = window.location.hostname;
         const isLocal = ['localhost', '127.0.0.1'].includes(hostname) || hostname.startsWith('192.168.');
@@ -19,9 +16,6 @@
         return false;
     }
 
-    /**
-     * Apply Content Security Policy (production only)
-     */
     function applyCSP() {
         const hostname = window.location.hostname;
         const isLocal = ['localhost', '127.0.0.1'].includes(hostname) || hostname.startsWith('192.168.');
@@ -31,42 +25,36 @@
             return;
         }
 
-        // Centralized domain lists for maintainability
         const domains = {
-            // Image sources (thumbnails, avatars, icons)
             images: [
                 "'self'",
                 "data:",
                 "https://raw.githubusercontent.com",
                 "https://cdn.cdnlogo.com",
                 "https://upload.wikimedia.org",
-                // Behance
                 "https://behance.net",
                 "https://*.behance.net",
                 "https://behanceusercontent.com",
                 "https://*.behanceusercontent.com",
-                // GitHub
                 "https://github.com",
                 "https://*.github.com",
                 "https://avatars.githubusercontent.com",
                 "https://github.githubassets.com"
             ].join(' '),
             
-            // API/Connect sources
             connects: [
                 "'self'",
                 "https://komarev.com",
-                // Behance API
                 "https://behance.net",
                 "https://*.behance.net",
                 "https://api.behance.net",
-                // GitHub API
                 "https://github.com",
                 "https://*.github.com",
-                "https://api.github.com"
+                "https://api.github.com",
+                // 🔥 ADD CountAPI to allowed connections
+                "https://api.countapi.xyz"
             ].join(' '),
             
-            // Frame sources (embeds)
             frames: [
                 "'self'",
                 "https://behance.net",
@@ -92,7 +80,7 @@
         ].join('; ');
         
         document.head.appendChild(meta);
-        console.log('🔒 CSP applied (production) - Behance + GitHub supported');
+        console.log('🔒 CSP applied (production) - Behance + GitHub + CountAPI supported');
     }
 
     if (!enforceHTTPS()) {
