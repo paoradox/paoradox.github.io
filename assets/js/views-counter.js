@@ -1,51 +1,43 @@
 /**
- * Profile Views Counter - Secure Static Implementation
- * Anti-spam: Daily cooldown + session flag + rate limiting
+ * Profile Views Counter - Secure Implementation
+ * Fetches global count from komarev.com/ghpvc, adds local +1 per viewer
+ * Includes input validation, sanitization, and error handling
  */
 (function() {
     'use strict';
 
-    // Configuration
     const CONFIG = {
+        KOMAREV_URL: 'https://komarev.com/ghpvc/?username=paoradox',
         VIEWS_KEY: 'paoradox_views_count',
+        OFFSET_KEY: 'paoradox_views_offset',
         LAST_VIEW_KEY: 'paoradox_last_view_time',
-        SESSION_FLAG: 'paoradox_view_counted_session',
         COOLDOWN_HOURS: 24,
-        MIN_INTERVAL_MS: 1000, // 1 second minimum between increments
-        STORAGE_VERSION: '1.0'
+        SESSION_FLAG: 'paoradox_view_counted_session',
+        MAX_VIEWS: 1000000000,
+        MAX_OFFSET: 1000000
     };
 
-    // DOM elements
     let viewCountElement = null;
+    let viewsLabelElement = null;
     let counterContainer = null;
 
-    /**
-     * Get current timestamp in milliseconds
-     */
     function getNow() {
         return Date.now();
     }
 
-    /**
-     * Safely get item from localStorage with fallback
-     */
     function getStorageItem(key, fallback = null) {
         try {
             const value = localStorage.getItem(key);
             return value !== null ? value : fallback;
         } catch (e) {
-            // localStorage unavailable or quota exceeded
             console.warn('Views Counter: localStorage unavailable', e);
             return fallback;
         }
     }
 
-    /**
-     * Safely set item in localStorage
-     */
     function setStorageItem(key, value) {
         try {
-            localStorage.setItem(key, value);
+            localStorage.setItem(key, String(value));
             return true;
         } catch (e) {
             console.warn('Views Counter: Failed to save to localStorage', e);
@@ -54,38 +46,46 @@
     }
 
     /**
-     * Get current view count (number)
+     * Validate a number is within acceptable bounds
+     */
+    function validateNumber(value, max, fallback) {
+        const num = parseInt(value, 10);
+        if (isNaN(num) || num < 0 || num > max) {
+            return fallback;
+        }
+        return num;
+    }
+
+    /**
+     * Get local offset with validation
+     */
+    function getLocalOffset() {
+        const stored = getStorageItem(CONFIG.OFFSET_KEY, '0');
+        return validateNumber(stored, CONFIG.MAX_OFFSET, 0);
+    }
+
+    /**
+     * Set local offset with validation
+     */
+    function setLocalOffset(offset) {
+        const validOffset = validateNumber(offset, CONFIG.MAX_OFFSET, 0);
+        setStorageItem(CONFIG.OFFSET_KEY, validOffset);
+    }
+
+    /**
+     * Get view count with validation
      */
     function getViews() {
         const stored = getStorageItem(CONFIG.VIEWS_KEY, '0');
-        const count = parseInt(stored, 10);
-        return isNaN(count) ? 0 : count;
+        return validateNumber(stored, CONFIG.MAX_VIEWS, 0);
     }
 
     /**
-     * Set view count (number)
+     * Set view count with validation
      */
     function setViews(count) {
-        if (count < 0) count = 0;
-        setStorageItem(CONFIG.VIEWS_KEY, String(count));
-    }
-
-    /**
-     * Check if enough time has passed since last view
-     */
-    function canIncrement() {
-        const lastView = getStorageItem(CONFIG.LAST_VIEW_KEY, '0');
-        const lastTime = parseInt(lastView, 10);
-        const now = getNow();
-
-        // Rate limiting: minimum interval check
-        if (!isNaN(lastTime) && (now - lastTime) < CONFIG.MIN_INTERVAL_MS) {
-            return false;
-        }
-
-        // Cooldown check: 24 hours
-        const hoursSince = (now - lastTime) / (1000 * 60 * 60);
-        return isNaN(lastTime) || hoursSince >= CONFIG.COOLDOWN_HOURS;
+        const validCount = validateNumber(count, CONFIG.MAX_VIEWS, 0);
+        setStorageItem(CONFIG.VIEWS_KEY, validCount);
     }
 
     /**
@@ -103,37 +103,113 @@
     }
 
     /**
-     * Increment view count if conditions met
-     * Returns true if incremented, false otherwise
+     * Check if 24h have passed since last increment
      */
-    function incrementViews() {
-        // Check session flag first (fastest)
-        if (sessionCounted()) {
+    function canIncrement() {
+        const lastView = getStorageItem(CONFIG.LAST_VIEW_KEY, '0');
+        const lastTime = validateNumber(lastView, Date.now(), 0);
+        const now = getNow();
+
+        if (lastTime === 0) return true;
+
+        const hoursSince = (now - lastTime) / (1000 * 60 * 60);
+        return hoursSince >= CONFIG.COOLDOWN_HOURS;
+    }
+
+    /**
+     * Try to increment local offset with validation
+     */
+    function tryIncrementOffset() {
+        if (sessionCounted()) return false;
+        if (!canIncrement()) return false;
+
+        const currentOffset = getLocalOffset();
+        if (currentOffset >= CONFIG.MAX_OFFSET) {
+            console.warn('Views Counter: Maximum offset reached');
             return false;
         }
-
-        // Check cooldown
-        if (!canIncrement()) {
-            return false;
-        }
-
-        // All checks passed - increment
-        const currentViews = getViews();
-        const newViews = currentViews + 1;
-
-        setViews(newViews);
+        
+        setLocalOffset(currentOffset + 1);
         setStorageItem(CONFIG.LAST_VIEW_KEY, String(getNow()));
         markSessionCounted();
-
         return true;
     }
 
     /**
-     * Update the DOM with current count
+     * Fetch current global count from Komarev with validation
+     */
+    function fetchGlobalCount() {
+        return fetch(CONFIG.KOMAREV_URL, {
+            method: 'GET',
+            headers: {
+                'Accept': 'image/svg+xml,text/html'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(svgText => {
+            // Validate response is SVG-like
+            if (!svgText || (!svgText.includes('<svg') && !svgText.includes('<text'))) {
+                console.warn('Views Counter: Invalid response from Komarev');
+                return null;
+            }
+
+            // Parse and validate the number from SVG
+            const match = svgText.match(/<text[^>]*>([\d,]+)<\/text>/);
+            if (match) {
+                const number = parseInt(match[1].replace(/,/g, ''), 10);
+                return validateNumber(number, CONFIG.MAX_VIEWS, null);
+            }
+
+            // Fallback: try to find any number in the SVG
+            const numberMatch = svgText.match(/(\d[\d,]*)/);
+            if (numberMatch) {
+                const number = parseInt(numberMatch[1].replace(/,/g, ''), 10);
+                return validateNumber(number, CONFIG.MAX_VIEWS, null);
+            }
+
+            console.warn('Views Counter: No number found in Komarev response');
+            return null;
+        })
+        .catch(error => {
+            console.warn('Views Counter: Failed to fetch Komarev count:', error.message);
+            return null;
+        });
+    }
+
+    /**
+     * Update the display with the count
      */
     function updateDisplay(count) {
         if (viewCountElement) {
-            viewCountElement.textContent = count;
+            if (typeof count === 'number') {
+                viewCountElement.textContent = count.toLocaleString();
+            } else {
+                viewCountElement.textContent = count;
+            }
+        }
+    }
+
+    /**
+     * Update the label - always shows "views"
+     */
+    function updateLabel() {
+        if (viewsLabelElement) {
+            viewsLabelElement.textContent = 'views';
+        }
+    }
+
+    /**
+     * Update the tooltip - always shows "Unique visits (24h cooldown)"
+     */
+    function updateTooltip() {
+        const tooltip = document.querySelector('.views-tooltip');
+        if (tooltip) {
+            tooltip.textContent = 'Unique visits (24h cooldown)';
         }
     }
 
@@ -141,11 +217,10 @@
      * Trigger pulse animation on the counter
      */
     function triggerPulse() {
-        if (counterContainer) {
-            counterContainer.classList.remove('pulse');
-            // Force reflow for animation restart
-            void counterContainer.offsetWidth;
-            counterContainer.classList.add('pulse');
+        if (viewCountElement) {
+            viewCountElement.classList.remove('terminal-counter-pulse');
+            void viewCountElement.offsetWidth;
+            viewCountElement.classList.add('terminal-counter-pulse');
         }
     }
 
@@ -153,16 +228,13 @@
      * Initialize the views counter
      */
     function initViewsCounter() {
-        // Wait for DOM to be ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initViewsCounter);
             return;
         }
 
-        // Find or create counter element
         let container = document.getElementById('viewsCounter');
         if (!container) {
-            // Create the overlay if it doesn't exist
             container = document.createElement('div');
             container.id = 'viewsCounter';
             container.className = 'views-counter';
@@ -171,67 +243,86 @@
 
             container.innerHTML = `
                 <span class="terminal-prompt">$</span>
+                <span id="viewCount" class="terminal-counter-blink">0</span>
                 <span class="views-label">views</span>
-                <span id="viewCount">0</span>
-                <span class="views-tooltip">unique views (24h cooldown)</span>
+                <span class="views-tooltip">Unique visits (24h cooldown)</span>
             `;
 
             document.body.appendChild(container);
         }
 
-        // Cache DOM references
         counterContainer = container;
         viewCountElement = document.getElementById('viewCount');
+        viewsLabelElement = document.querySelector('.views-label');
 
         if (!viewCountElement) {
             console.warn('Views Counter: viewCount element not found');
             return;
         }
 
-        // Get current count
-        let currentCount = getViews();
+        // Show loading state
+        updateDisplay('…');
+        updateLabel();
+        updateTooltip();
 
-        // Try to increment
-        const didIncrement = incrementViews();
+        // Try to increment local offset first
+        const didIncrement = tryIncrementOffset();
 
-        if (didIncrement) {
-            // Refresh count after increment
-            currentCount = getViews();
-            triggerPulse();
-        }
-
-        // Update display
-        updateDisplay(currentCount);
-
-        // Handle storage events from other tabs
-        window.addEventListener('storage', function(e) {
-            if (e.key === CONFIG.VIEWS_KEY) {
-                const newCount = parseInt(e.newValue, 10);
-                if (!isNaN(newCount)) {
-                    updateDisplay(newCount);
-                }
+        // Fetch global count from Komarev
+        fetchGlobalCount().then(globalCount => {
+            if (globalCount !== null) {
+                // ✅ Komarev working - show global + local
+                const offset = getLocalOffset();
+                const totalCount = globalCount + offset;
+                updateDisplay(totalCount);
+            } else {
+                // ❌ Komarev unreachable - show only local offset
+                const offset = getLocalOffset();
+                updateDisplay(offset || 0);
+            }
+            
+            if (didIncrement) {
+                triggerPulse();
             }
         });
 
-        // Handle page visibility change (user returns to tab)
+        // Refresh count when user returns to tab
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                // Only check if we haven't counted this session yet
-                if (!sessionCounted() && canIncrement()) {
-                    const didIncrementNow = incrementViews();
-                    if (didIncrementNow) {
-                        const updatedCount = getViews();
-                        updateDisplay(updatedCount);
+                const canInc = !sessionCounted() && canIncrement();
+                let didInc = false;
+                if (canInc) {
+                    didInc = tryIncrementOffset();
+                }
+
+                fetchGlobalCount().then(globalCount => {
+                    if (globalCount !== null) {
+                        const offset = getLocalOffset();
+                        const totalCount = globalCount + offset;
+                        updateDisplay(totalCount);
+                    } else {
+                        const offset = getLocalOffset();
+                        updateDisplay(offset || 0);
+                    }
+                    
+                    if (didInc) {
                         triggerPulse();
                     }
-                }
+                });
             }
         });
 
-        console.log(`Views Counter initialized: ${currentCount} views`);
+        console.log('Views Counter: Initialized securely');
     }
 
-    // Start the counter
+    // Global error handler for the counter
+    window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('Views Counter')) {
+            console.warn('Views Counter: Caught error:', e.message);
+        }
+    });
+
+    // Initialize
     initViewsCounter();
 
 })();
