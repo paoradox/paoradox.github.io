@@ -1,6 +1,6 @@
 /**
  * Profile Views Counter - OpenCounterAPI Integration
- * Works alongside OpenCounterAPI script to display visitor counts
+ * Displays as "$ views #" with blinking number
  */
 (function() {
     'use strict';
@@ -11,14 +11,12 @@
     let viewsLabelElement = null;
     let openCounterReady = false;
     let retryAttempts = 0;
-    const MAX_RETRIES = 20;
+    const MAX_RETRIES = 30;
 
     /**
      * Try to get the count from OpenCounterAPI's data-placeholder elements
      */
     function getCountFromOpenCounter() {
-        // OpenCounterAPI stores data in elements with data-placeholder
-        // We'll use the "now" (current visitors) as our primary count
         const nowElement = document.querySelector('[data-placeholder="now"]');
         if (nowElement) {
             const value = parseInt(nowElement.textContent, 10);
@@ -28,7 +26,6 @@
             }
         }
 
-        // Fallback: try "24h" (today's visitors)
         const todayElement = document.querySelector('[data-placeholder="24h"]');
         if (todayElement) {
             const value = parseInt(todayElement.textContent, 10);
@@ -38,7 +35,6 @@
             }
         }
 
-        // Fallback: try "month" (monthly visitors)
         const monthElement = document.querySelector('[data-placeholder="month"]');
         if (monthElement) {
             const value = parseInt(monthElement.textContent, 10);
@@ -52,13 +48,22 @@
     }
 
     /**
-     * Check if OpenCounterAPI is loaded and has data
+     * Check if OpenCounterAPI has populated the placeholders
      */
     function isOpenCounterReady() {
-        // Check if the script has been loaded and has populated the placeholders
         const nowElement = document.querySelector('[data-placeholder="now"]');
         if (nowElement) {
             const value = parseInt(nowElement.textContent, 10);
+            if (!isNaN(value) && value > 0) {
+                return true;
+            }
+            if (nowElement.textContent !== '0') {
+                return true;
+            }
+        }
+        const allPlaceholders = document.querySelectorAll('[data-placeholder]');
+        for (let el of allPlaceholders) {
+            const value = parseInt(el.textContent, 10);
             if (!isNaN(value) && value > 0) {
                 return true;
             }
@@ -82,7 +87,7 @@
     }
 
     /**
-     * Update label and tooltip
+     * Update label
      */
     function updateLabel() {
         if (viewsLabelElement) {
@@ -90,7 +95,7 @@
         }
         const tooltip = document.querySelector('.views-tooltip');
         if (tooltip) {
-            tooltip.textContent = 'Live visitor count';
+            tooltip.textContent = 'Unique visits (24h cooldown)';
         }
     }
 
@@ -114,11 +119,18 @@
         if (!isOpenCounterReady()) {
             if (retryAttempts < MAX_RETRIES) {
                 retryAttempts++;
-                console.log(`⏳ OpenCounterAPI not ready yet, retrying in 500ms...`);
-                setTimeout(updateCount, 500);
+                console.log(`⏳ OpenCounterAPI not ready yet, retrying in 1000ms...`);
+                setTimeout(updateCount, 1000);
             } else {
                 console.warn('⚠️ OpenCounterAPI not ready after max retries');
-                // Show local fallback if available
+                const count = getCountFromOpenCounter();
+                if (count !== null && count >= 0) {
+                    updateDisplay(count);
+                    updateLabel();
+                    openCounterReady = true;
+                    console.log(`✅ Loaded count from placeholder: ${count}`);
+                    return;
+                }
                 const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
                 updateDisplay(localCount);
                 updateLabel();
@@ -127,15 +139,13 @@
         }
 
         const count = getCountFromOpenCounter();
-        if (count !== null && count > 0) {
+        if (count !== null && count >= 0) {
             updateDisplay(count);
             updateLabel();
             openCounterReady = true;
             
-            // Store as fallback
             localStorage.setItem('paoradox_fallback_count', String(count));
             
-            // Trigger pulse on first load
             if (retryAttempts === 0) {
                 triggerPulse();
             }
@@ -145,7 +155,7 @@
             console.warn('⚠️ Could not retrieve count from OpenCounterAPI');
             if (retryAttempts < MAX_RETRIES) {
                 retryAttempts++;
-                setTimeout(updateCount, 500);
+                setTimeout(updateCount, 1000);
             } else {
                 const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
                 updateDisplay(localCount);
@@ -165,7 +175,6 @@
 
         console.log('📄 Document ready, creating counter...');
 
-        // Create or get the counter container
         let container = document.getElementById('viewsCounter');
         if (!container) {
             console.log('📄 Creating new counter container');
@@ -173,13 +182,14 @@
             container.id = 'viewsCounter';
             container.className = 'views-counter';
             container.setAttribute('role', 'status');
-            container.setAttribute('aria-label', 'Live visitor counter');
+            container.setAttribute('aria-label', 'Profile view counter');
 
+            // ✅ Format: "$ views #" with blinking number
             container.innerHTML = `
                 <span class="terminal-prompt">$</span>
                 <span class="views-label">views</span>
                 <span id="viewCount" class="terminal-counter-blink">0</span>
-                <span class="views-tooltip">Live visitor count</span>
+                <span class="views-tooltip">Unique visits (24h cooldown)</span>
             `;
 
             document.body.appendChild(container);
@@ -193,37 +203,52 @@
             return;
         }
 
-        // Show loading state
+        // ✅ Ensure the blinking class is applied
+        viewCountElement.classList.add('terminal-counter-blink');
+
         updateDisplay('…');
         updateLabel();
 
-        // Check if OpenCounterAPI is already loaded
-        if (typeof OpenCounterAPI !== 'undefined' || document.querySelector('[data-placeholder]')) {
-            console.log('📊 OpenCounterAPI appears to be loaded');
-            updateCount();
+        const hasPlaceholder = document.querySelector('[data-placeholder]');
+        if (hasPlaceholder) {
+            console.log('📊 Hidden placeholders found, checking for data...');
+            const nowElement = document.querySelector('[data-placeholder="now"]');
+            if (nowElement && parseInt(nowElement.textContent, 10) > 0) {
+                console.log('📊 OpenCounterAPI data already populated');
+                updateCount();
+            } else {
+                console.log('⏳ Waiting for OpenCounterAPI to populate data...');
+                let checkInterval = 0;
+                const maxCheck = 30;
+                const waitForData = setInterval(() => {
+                    checkInterval++;
+                    const nowEl = document.querySelector('[data-placeholder="now"]');
+                    if (nowEl && parseInt(nowEl.textContent, 10) >= 0) {
+                        clearInterval(waitForData);
+                        console.log('📊 OpenCounterAPI data found!');
+                        updateCount();
+                    } else if (checkInterval >= maxCheck) {
+                        clearInterval(waitForData);
+                        console.warn('⚠️ OpenCounterAPI did not populate data within timeout');
+                        const count = getCountFromOpenCounter();
+                        if (count !== null && count >= 0) {
+                            updateDisplay(count);
+                            updateLabel();
+                        } else {
+                            const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
+                            updateDisplay(localCount);
+                            updateLabel();
+                        }
+                    }
+                }, 1000);
+            }
         } else {
-            console.log('⏳ Waiting for OpenCounterAPI to load...');
-            // Wait for the OpenCounterAPI script to load
-            let checkInterval = 0;
-            const maxCheck = 30; // 30 seconds max
-            const waitForOpenCounter = setInterval(() => {
-                checkInterval++;
-                if (document.querySelector('[data-placeholder="now"]') && 
-                    parseInt(document.querySelector('[data-placeholder="now"]').textContent, 10) > 0) {
-                    clearInterval(waitForOpenCounter);
-                    console.log('📊 OpenCounterAPI loaded successfully');
-                    updateCount();
-                } else if (checkInterval >= maxCheck) {
-                    clearInterval(waitForOpenCounter);
-                    console.warn('⚠️ OpenCounterAPI did not load within timeout');
-                    const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
-                    updateDisplay(localCount);
-                    updateLabel();
-                }
-            }, 1000);
+            console.warn('⚠️ No OpenCounterAPI placeholders found in HTML');
+            const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
+            updateDisplay(localCount);
+            updateLabel();
         }
 
-        // Refresh when user returns to tab
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && openCounterReady) {
                 console.log('👁️ Tab visible, refreshing count...');
@@ -231,20 +256,9 @@
             }
         });
 
-        // Listen for OpenCounterAPI updates (if they trigger events)
-        document.addEventListener('openCounterUpdate', function(e) {
-            console.log('📊 OpenCounterAPI update event received');
-            if (e.detail && e.detail.count) {
-                updateDisplay(e.detail.count);
-            } else {
-                updateCount();
-            }
-        });
-
         console.log('✅ Views Counter initialized with OpenCounterAPI');
     }
 
-    // Start the counter
     initViewsCounter();
 
 })();
