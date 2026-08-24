@@ -31,13 +31,14 @@
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https://raw.githubusercontent.com https://cdn.cdnlogo.com https://upload.wikimedia.org",
             "connect-src 'self'",
-            "frame-src 'none'",
+            // 🔥 Allow Behance iframes
+            "frame-src 'self' https://www.behance.net",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'"
         ].join('; ');
         document.head.appendChild(meta);
-        console.log('🔒 CSP applied (production)');
+        console.log('🔒 CSP applied (production) - Behance embeds allowed');
     }
 
     if (!enforceHTTPS()) {
