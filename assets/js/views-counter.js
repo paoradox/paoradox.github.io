@@ -1,74 +1,50 @@
 /**
- * Profile Views Counter - OpenCounterAPI Integration
- * Displays as "$ views #" with blinking number
+ * Profile Views Counter - CountAPI Integration
+ * Simple, free, and reliable visitor counter
  */
 (function() {
     'use strict';
 
-    console.log('🔍 Views Counter: Starting with OpenCounterAPI...');
+    console.log('🔍 Views Counter: Starting with CountAPI...');
 
     let viewCountElement = null;
     let viewsLabelElement = null;
-    let openCounterReady = false;
-    let retryAttempts = 0;
-    const MAX_RETRIES = 30;
+
+    const CONFIG = {
+        // CountAPI endpoint - free, no CORS issues
+        COUNT_API_URL: 'https://api.countapi.xyz/hit/paoradox/portfolio',
+        FALLBACK_KEY: 'paoradox_fallback_count'
+    };
 
     /**
-     * Try to get the count from OpenCounterAPI's data-placeholder elements
+     * Fetch the count from CountAPI
      */
-    function getCountFromOpenCounter() {
-        const nowElement = document.querySelector('[data-placeholder="now"]');
-        if (nowElement) {
-            const value = parseInt(nowElement.textContent, 10);
-            if (!isNaN(value) && value >= 0) {
-                console.log(`📊 OpenCounterAPI 'now' value: ${value}`);
-                return value;
+    function fetchCount() {
+        console.log('🌐 Fetching count from CountAPI...');
+        
+        return fetch(CONFIG.COUNT_API_URL, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
             }
-        }
-
-        const todayElement = document.querySelector('[data-placeholder="24h"]');
-        if (todayElement) {
-            const value = parseInt(todayElement.textContent, 10);
-            if (!isNaN(value) && value >= 0) {
-                console.log(`📊 OpenCounterAPI '24h' value: ${value}`);
-                return value;
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-        }
-
-        const monthElement = document.querySelector('[data-placeholder="month"]');
-        if (monthElement) {
-            const value = parseInt(monthElement.textContent, 10);
-            if (!isNaN(value) && value >= 0) {
-                console.log(`📊 OpenCounterAPI 'month' value: ${value}`);
-                return value;
+            return response.json();
+        })
+        .then(data => {
+            if (data && typeof data.value === 'number') {
+                console.log(`📊 CountAPI returned: ${data.value}`);
+                return data.value;
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if OpenCounterAPI has populated the placeholders
-     */
-    function isOpenCounterReady() {
-        const nowElement = document.querySelector('[data-placeholder="now"]');
-        if (nowElement) {
-            const value = parseInt(nowElement.textContent, 10);
-            if (!isNaN(value) && value > 0) {
-                return true;
-            }
-            if (nowElement.textContent !== '0') {
-                return true;
-            }
-        }
-        const allPlaceholders = document.querySelectorAll('[data-placeholder]');
-        for (let el of allPlaceholders) {
-            const value = parseInt(el.textContent, 10);
-            if (!isNaN(value) && value > 0) {
-                return true;
-            }
-        }
-        return false;
+            throw new Error('Invalid response from CountAPI');
+        })
+        .catch(error => {
+            console.warn('⚠️ CountAPI fetch failed:', error.message);
+            return null;
+        });
     }
 
     /**
@@ -111,60 +87,6 @@
     }
 
     /**
-     * Main function to fetch and update the count
-     */
-    function updateCount() {
-        console.log(`🔄 Attempting to fetch count (attempt ${retryAttempts + 1})...`);
-
-        if (!isOpenCounterReady()) {
-            if (retryAttempts < MAX_RETRIES) {
-                retryAttempts++;
-                console.log(`⏳ OpenCounterAPI not ready yet, retrying in 1000ms...`);
-                setTimeout(updateCount, 1000);
-            } else {
-                console.warn('⚠️ OpenCounterAPI not ready after max retries');
-                const count = getCountFromOpenCounter();
-                if (count !== null && count >= 0) {
-                    updateDisplay(count);
-                    updateLabel();
-                    openCounterReady = true;
-                    console.log(`✅ Loaded count from placeholder: ${count}`);
-                    return;
-                }
-                const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
-                updateDisplay(localCount);
-                updateLabel();
-            }
-            return;
-        }
-
-        const count = getCountFromOpenCounter();
-        if (count !== null && count >= 0) {
-            updateDisplay(count);
-            updateLabel();
-            openCounterReady = true;
-            
-            localStorage.setItem('paoradox_fallback_count', String(count));
-            
-            if (retryAttempts === 0) {
-                triggerPulse();
-            }
-            
-            console.log(`✅ Successfully loaded count: ${count}`);
-        } else {
-            console.warn('⚠️ Could not retrieve count from OpenCounterAPI');
-            if (retryAttempts < MAX_RETRIES) {
-                retryAttempts++;
-                setTimeout(updateCount, 1000);
-            } else {
-                const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
-                updateDisplay(localCount);
-                updateLabel();
-            }
-        }
-    }
-
-    /**
      * Initialize the views counter
      */
     function initViewsCounter() {
@@ -184,7 +106,6 @@
             container.setAttribute('role', 'status');
             container.setAttribute('aria-label', 'Profile view counter');
 
-            // ✅ Format: "$ views #" with blinking number
             container.innerHTML = `
                 <span class="terminal-prompt">$</span>
                 <span class="views-label">views</span>
@@ -203,62 +124,66 @@
             return;
         }
 
-        // ✅ Ensure the blinking class is applied
+        // Ensure blinking class is applied
         viewCountElement.classList.add('terminal-counter-blink');
 
+        // Show loading state
         updateDisplay('…');
         updateLabel();
 
-        const hasPlaceholder = document.querySelector('[data-placeholder]');
-        if (hasPlaceholder) {
-            console.log('📊 Hidden placeholders found, checking for data...');
-            const nowElement = document.querySelector('[data-placeholder="now"]');
-            if (nowElement && parseInt(nowElement.textContent, 10) > 0) {
-                console.log('📊 OpenCounterAPI data already populated');
-                updateCount();
-            } else {
-                console.log('⏳ Waiting for OpenCounterAPI to populate data...');
-                let checkInterval = 0;
-                const maxCheck = 30;
-                const waitForData = setInterval(() => {
-                    checkInterval++;
-                    const nowEl = document.querySelector('[data-placeholder="now"]');
-                    if (nowEl && parseInt(nowEl.textContent, 10) >= 0) {
-                        clearInterval(waitForData);
-                        console.log('📊 OpenCounterAPI data found!');
-                        updateCount();
-                    } else if (checkInterval >= maxCheck) {
-                        clearInterval(waitForData);
-                        console.warn('⚠️ OpenCounterAPI did not populate data within timeout');
-                        const count = getCountFromOpenCounter();
-                        if (count !== null && count >= 0) {
-                            updateDisplay(count);
-                            updateLabel();
-                        } else {
-                            const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
-                            updateDisplay(localCount);
-                            updateLabel();
-                        }
-                    }
-                }, 1000);
+        // Try to get count from localStorage first (for speed)
+        const cachedCount = localStorage.getItem(CONFIG.FALLBACK_KEY);
+        if (cachedCount) {
+            const count = parseInt(cachedCount, 10);
+            if (!isNaN(count) && count > 0) {
+                console.log(`📦 Using cached count: ${count}`);
+                updateDisplay(count);
             }
-        } else {
-            console.warn('⚠️ No OpenCounterAPI placeholders found in HTML');
-            const localCount = localStorage.getItem('paoradox_fallback_count') || '0';
-            updateDisplay(localCount);
-            updateLabel();
         }
 
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && openCounterReady) {
-                console.log('👁️ Tab visible, refreshing count...');
-                updateCount();
+        // Fetch from CountAPI
+        fetchCount().then(count => {
+            if (count !== null && count >= 0) {
+                updateDisplay(count);
+                // Store in localStorage as fallback
+                localStorage.setItem(CONFIG.FALLBACK_KEY, String(count));
+                triggerPulse();
+                console.log(`✅ Successfully loaded count: ${count}`);
+            } else {
+                // If fetch fails, use cached or show 0
+                const cached = localStorage.getItem(CONFIG.FALLBACK_KEY);
+                if (cached) {
+                    const cachedCount = parseInt(cached, 10);
+                    if (!isNaN(cachedCount) && cachedCount >= 0) {
+                        updateDisplay(cachedCount);
+                        console.log(`📦 Using cached fallback: ${cachedCount}`);
+                    } else {
+                        updateDisplay('0');
+                    }
+                } else {
+                    updateDisplay('0');
+                }
+                console.warn('⚠️ Using fallback count');
             }
         });
 
-        console.log('✅ Views Counter initialized with OpenCounterAPI');
+        // Refresh when user returns to tab
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('👁️ Tab visible, refreshing count...');
+                fetchCount().then(count => {
+                    if (count !== null && count >= 0) {
+                        updateDisplay(count);
+                        localStorage.setItem(CONFIG.FALLBACK_KEY, String(count));
+                    }
+                });
+            }
+        });
+
+        console.log('✅ Views Counter initialized with CountAPI');
     }
 
+    // Start the counter
     initViewsCounter();
 
 })();
