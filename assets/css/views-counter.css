@@ -1,0 +1,125 @@
+/* Views Counter - Component Styles */
+/* Font inherited from styles.min.css (Fira Code) */
+
+.views-counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(2, 170, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    user-select: none;
+    cursor: default;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.views-counter:hover {
+    border-color: rgba(2, 170, 255, 0.5);
+    box-shadow: 0 4px 30px rgba(2, 170, 255, 0.1);
+}
+
+.views-counter #viewCount {
+    color: #ffffff;
+    font-weight: 600;
+    min-width: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+.views-counter .views-label {
+    color: #02aaff;  /* Changed to match IT_Support */
+    font-size: 0.8rem;
+    margin-left: 2px;
+}
+
+/* Tooltip - hidden by default, shown on hover */
+.views-counter .views-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(2, 170, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    color: #8899aa;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateY(-4px);
+}
+
+.views-counter:hover .views-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Pulse animation for new view */
+@keyframes viewsPulse {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.15);
+        color: #02aaff;
+    }
+    50% {
+        transform: scale(1);
+    }
+    75% {
+        transform: scale(1.05);
+        color: #02aaff;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.views-counter.pulse #viewCount {
+    animation: viewsPulse 0.6s ease;
+}
+
+/* Responsive - smaller on mobile */
+@media (max-width: 576px) {
+    .views-counter {
+        top: 12px;
+        right: 12px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+    .views-counter .views-label {
+        font-size: 0.7rem;
+    }
+    .views-counter .views-tooltip {
+        display: none; /* Hide tooltip on mobile for cleaner UI */
+    }
+}
+
+/* Dark theme support - if data-bs-theme="dark" */
+[data-bs-theme="dark"] .views-counter {
+    background: rgba(0, 0, 0, 0.85);
+    border-color: rgba(2, 170, 255, 0.15);
+}
+
+[data-bs-theme="dark"] .views-counter:hover {
+    border-color: rgba(2, 170, 255, 0.4);
+}
+
+/* Light theme adjustments */
+[data-bs-theme="light"] .views-counter {
+    background: rgba(20, 20, 30, 0.8);
+    border-color: rgba(2, 170, 255, 0.2);
+}
+
+[data-bs-theme="light"] .views-counter .views-label {
+    color: #02aaff;
+}

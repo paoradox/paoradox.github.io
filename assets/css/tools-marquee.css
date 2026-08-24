@@ -1,3 +1,6 @@
+/* Tools Marquee - Component Styles */
+/* Font inherited from styles.min.css (Fira Code) */
+
 .marquee-wrapper {
   overflow: hidden;
   width: 100%;
@@ -39,25 +42,4 @@
 
 .marquee-wrapper:hover .marquee-track {
   animation-play-state: paused;
-}
-
-/* Terminal-style heading */
-.terminal-heading {
-  font-family: inherit;
-}
-
-.terminal-prompt {
-  color: #4d7fff;
-  margin-right: 0.5rem;
-}
-
-.terminal-cursor {
-  animation: blink 1s step-end infinite;
-  color: #4d7fff;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
 }

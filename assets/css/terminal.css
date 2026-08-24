@@ -1,0 +1,43 @@
+/* Terminal Styles - Unified across all components */
+/* Font inherited from styles.min.css (Fira Code) */
+/* Color: #02aaff matches IT_Support text-info */
+
+/* Terminal-style heading */
+.terminal-heading {
+    font-family: inherit;
+    color: #02aaff;
+}
+
+/* Terminal prompt symbol */
+.terminal-prompt {
+    color: #02aaff;
+    margin-right: 0.5rem;
+}
+
+/* Terminal cursor blinking effect */
+.terminal-cursor {
+    animation: blink 1s step-end infinite;
+    color: #02aaff;
+}
+
+/* Blink animation for cursor */
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Optional: Terminal text badge (for inline terminal-style text) */
+.terminal-text {
+    color: #02aaff;
+    font-family: inherit;
+}
+
+/* Optional: Terminal accent border */
+.terminal-border {
+    border-color: rgba(2, 170, 255, 0.3);
+}
+
+.terminal-border:hover {
+    border-color: rgba(2, 170, 255, 0.6);
+}
