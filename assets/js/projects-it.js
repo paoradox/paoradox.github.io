@@ -31,6 +31,7 @@
     "QoL-Scripts": "Quality of Life (QoL) Scripts",
     "Python-Image-Resizer": "Image Resizing Tool",
     "Python-Generate-QR": "QR Generation Tool",
+    "PHP-Extract-PDF-Text": "PDF Text Extraction Tool",
     "Python-Tor-Traffic-Stealth": "Tor Browser Net Traffic Stealth Tool",
     "UI-CarrotCakeManila": "Carrot Cake Manila Design",
     "UI-Daily-Time-Record": "Daily Time Record Design",
@@ -47,7 +48,7 @@
     "UI-Everyday-Empress": "Everyday Empress Design",
     "Python-PSA-PDS": "PSA Personnel Directory System",
     "Python-PC-Specs": "PC Specs Viewing Tool",
-    "Python-PhilSys-Stop-MDS": "PSA-PhilSys MDS Service Reboot Tool",
+    "Python-PhilSys-Stop-MDS": "PSA-PhilSys MDS Service Tool",
     "Python-PhilSys-Packet-Backup": "PSA-PhilSys Data Packets Backup Tool",
     "Python-PhilSys-DAR-Calculator": "PSA-PhilSys Daily Accomplishment Calculator",
     "Python-Calculator": "Simple Calculator",
@@ -61,7 +62,7 @@
     "Java-File-Backup": "File Backup Tool",
     "VBnet-Debt-Tracking-System": "Debt Tracking System",
     "VBnet-Daily-Time-Tracker": "Daily Time Tracking Tool",
-    "VBnet-INC-SCN-M201": "INC SCN-M201 Directory System",
+    "VBnet-INC-SCN-M201": "INC Form SCN-M201 Records System",
     "VBnet-Basic-Text-Encryption": "Basic Text Encryption",
     "Java-Binary-Search-Tree": "Binary Search Tree Visualizer Tool"
     // add more as: "repo-slug": "Custom Display Name"
