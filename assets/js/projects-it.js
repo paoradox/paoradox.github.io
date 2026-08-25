@@ -63,7 +63,7 @@
     "VBnet-Daily-Time-Tracker": "Daily Time Tracking Tool",
     "VBnet-INC-SCN-M201": "INC SCN-M201 Directory System",
     "VBnet-Basic-Text-Encryption": "Basic Text Encryption",
-    "Java-Tree-Structure": "Tree Visualizer Tool"
+    "Java-Binary-Search-Tree": "Binary Search Tree Visualizer Tool"
     // add more as: "repo-slug": "Custom Display Name"
   };
 
