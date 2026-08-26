@@ -54,6 +54,13 @@ paoradox.github.io/
 │       ├── greetings.js          # Matrix‑style greeting overlay
 │       ├── projects-multimedia.js # Behance gallery with glow effect
 │       └── projects-it.js        # GitHub repo browser with custom names
+├── old/                          # Earlier/unused versions of files
+│   ├── index-backup.html
+│   ├── index-no-pagination.html
+│   ├── index-no-views.html
+│   ├── projects-it - Copy.js
+│   ├── projects-multimedia - Copy.js
+│   └── ui-paoradox.bsdesign
 └── README.md                     # This file
 ```
 
