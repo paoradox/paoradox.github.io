@@ -39,29 +39,29 @@ A terminal‑themed portfolio website showcasing multimedia and IT projects, des
 
 ```
 paoradox.github.io/
-├── index.html                    # Main entry point
+├── index.html                     # Main entry point
 ├── assets/
-│   ├── bootstrap/                # Bootstrap CSS/JS (local)
+│   ├── bootstrap/                 # Bootstrap CSS/JS (local)
 │   ├── css/
-│   │   ├── styles.min.css        # Core styles
-│   │   ├── terminal.css          # Terminal prompt & cursor styles
-│   │   ├── greetings.css         # Matrix greeting overlay
-│   │   └── tools-marquee.css     # Tools carousel animation
-│   ├── fonts/                    # Font Awesome (local)
-│   ├── img/                      # Header images, favicon, OG preview
+│   │   ├── styles.min.css         # Core styles
+│   │   ├── terminal.css           # Terminal prompt & cursor styles
+│   │   ├── greetings.css          # Matrix greeting overlay
+│   │   └── tools-marquee.css      # Tools carousel animation
+│   ├── fonts/                     # Font Awesome (local)
+│   ├── img/                       # Header images, favicon, OG preview
 │   └── js/
-│       ├── security.js           # CSP + HTTPS enforcement
-│       ├── greetings.js          # Matrix‑style greeting overlay
+│       ├── security.js            # CSP + HTTPS enforcement
+│       ├── greetings.js           # Matrix‑style greeting overlay
 │       ├── projects-multimedia.js # Behance gallery with glow effect
-│       └── projects-it.js        # GitHub repo browser with custom names
-├── old/                          # Earlier/unused versions of files
+│       └── projects-it.js         # GitHub repo browser with custom names
+├── old/                           # Earlier/unused versions of files
 │   ├── index-backup.html
 │   ├── index-no-pagination.html
 │   ├── index-no-views.html
 │   ├── projects-it - Copy.js
 │   ├── projects-multimedia - Copy.js
 │   └── ui-paoradox.bsdesign
-└── README.md                     # This file
+└── README.md                      # This file
 ```
 
 ---
