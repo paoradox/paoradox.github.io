@@ -8,21 +8,31 @@ Provide consistent AI behavior across development tasks while minimizing repetit
 
 ## Project Settings
 
-* Project Name: `[PROJECT_NAME]`
-* Language(s): `[LANGUAGE]`
-* Framework(s): `[FRAMEWORK]`
-* Database: `[DATABASE]`
-* Package Manager: `[PACKAGE_MANAGER]`
-* Testing Framework: `[TEST_FRAMEWORK]`
+* Project Name: `[ui-paoradox]`
+* Language(s): `[HTML, CSS, JAVASCRIPT]`
+* Framework(s): `[BOOTSTRAP 5]`
+* Database: `[NONE]`
+* Package Manager: `[NONE]`
+* Testing Framework: `[NONE]`
 
 ---
 
 ## Operating Preferences
 
-* Experience Level: `[Beginner | Intermediate | Advanced]`
-* Explanation Level: `[Minimal | Balanced | Detailed]`
-* Change Policy: `[Preview First | Ask for Major Changes | Direct Implementation]`
-* Comment Style: `[Minimal | Block Comments | Detailed]`
+* Experience Level: `[Beginner]`
+* Explanation Level: `[Balanced]`
+* Change Policy: `[Preview First]`
+* Comment Style: `[Block Comments]`
+
+---
+
+## Configuration Validation
+
+Before proceeding, verify that all required Project Settings and Operating Preferences have valid values.
+
+If a field contains an unresolved placeholder or an unselected choice, request the missing information only when it is necessary to complete the current task.
+
+Do not assume values unless they have already been provided or established during the current session.
 
 ---
 
@@ -38,13 +48,13 @@ Respect the project's:
 * Coding Style
 * Approved Dependencies
 
-Do not introduce new frameworks or tools without approval.
+Do not introduce new frameworks, libraries, tools, or architectural patterns without approval.
 
 ### 2. Stay Within Scope
 
 Implement only what was requested.
 
-Do not add extra features, refactors, or optimizations unless explicitly approved.
+Do not add extra features, refactors, optimizations, or opinionated improvements unless explicitly approved.
 
 ### 3. Write Maintainable Code
 
@@ -67,6 +77,18 @@ Add comments when:
 
 Avoid comments that explain obvious code.
 
+### 5. Minimize Prompt Waste
+
+Provide only information necessary to complete the task.
+
+Avoid:
+
+* Repeating known context
+* Redundant explanations
+* Unnecessary assumptions
+
+Prefer concise, actionable responses.
+
 ---
 
 ## Workflow
@@ -76,10 +98,13 @@ Avoid comments that explain obvious code.
 Before coding:
 
 * Understand the request
+* Identify the actual goal behind the request
 * Identify risks
 * Identify missing details
+* Extract constraints before proposing solutions
+* Reuse decisions already established in the current session
 
-Ask questions if critical information is missing.
+Ask questions only when critical information is missing.
 
 ### Step 2: Plan
 
@@ -89,14 +114,15 @@ For medium or large tasks, provide:
 * Proposed Approach
 * Files Affected
 * Potential Risks
+* Success Criteria
 
 ### Step 3: Preview
 
 Before major modifications:
 
 * Show proposed changes
-* Provide code preview when helpful
-* Ask for approval when appropriate
+* Provide code previews when helpful
+* Ask for approval when required by the Change Policy
 
 Do not automatically implement suggested improvements.
 
@@ -107,6 +133,7 @@ While coding:
 * Preserve existing functionality
 * Follow project conventions
 * Avoid unnecessary changes
+* Keep modifications scoped to the request
 
 ### Step 5: Validate
 
@@ -118,6 +145,14 @@ When possible:
 * Verify functionality
 
 Never claim validation was performed if it was not.
+
+### Step 6: Export
+
+Export exactly the requested deliverable.
+
+If generating a complete project file (README, configuration, documentation, etc.), provide exactly one final version unless multiple versions are explicitly requested.
+
+When exporting Markdown files, prefer a single complete Markdown code block for easy copy-paste.
 
 ---
 
@@ -150,7 +185,7 @@ When providing solutions:
 4. Validation Results
 5. Recommendations (Optional)
 
-Keep explanations concise unless detailed mode is requested.
+Keep explanations concise unless a detailed explanation is requested.
 
 ---
 
@@ -159,6 +194,17 @@ Keep explanations concise unless detailed mode is requested.
 Retain decisions made during the current session.
 
 Avoid repeating explanations already provided.
+
+Prioritize previously approved decisions before creating new ones.
+
+Carry forward:
+
+* Architecture Decisions
+* Technical Constraints
+* Rejected Approaches
+* Approved Standards
+* Coding Standards
+* Project Preferences
 
 Reuse approved:
 
@@ -178,9 +224,10 @@ Do not:
 * Invent test results
 * Invent performance metrics
 * Invent completed work
+* Invent dependencies
 * Claim success without verification
 
-Always be transparent about assumptions and limitations.
+Always be transparent about assumptions, limitations, and unverified information.
 
 ---
 
@@ -191,9 +238,12 @@ Before every final response:
 * [ ] Request addressed
 * [ ] Scope respected
 * [ ] Existing stack followed
+* [ ] Existing session decisions reused
 * [ ] Security reviewed
 * [ ] Code readable
 * [ ] Useful comments included
+* [ ] Success criteria satisfied
+* [ ] No unnecessary output
 * [ ] No fabricated claims
 * [ ] Validation attempted when possible
 * [ ] Approval requested when required
