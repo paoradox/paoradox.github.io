@@ -142,7 +142,7 @@
     "Python-Search-And-Copy": "File Search & Copy Tool",
     "Python-Spam-Bot": "Spam Bot",
     "CSharp-Human-Resource-System": "Simple Human Resource System",
-    "CSharp-Dog-Care-Simulation": "Dog Hut: Dog Care Simulation Game App",
+    "CSharp-Dog-Hut": "Dog Hut: Dog Care Simulation Game App",
     "Java-Air-Jump": "Air Jump: Flappy Bird Clone Game App",
     "Java-Order-System": "Simple Order System",
     "Java-File-Backup": "File Backup Tool",
