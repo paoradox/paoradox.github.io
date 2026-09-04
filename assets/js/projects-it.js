@@ -113,6 +113,7 @@
 
   // --- Repo Data ---
   const repos = {
+    "Python-Pynal-Destination": "Pynal Destination: Location History Recorder App",
     "Python-Video-Downloader": "Youtube Playlist Downloader",
     "QoL-Scripts": "Quality of Life (QoL) Scripts",
     "Python-Image-Resizer": "Image Resizing Tool",
