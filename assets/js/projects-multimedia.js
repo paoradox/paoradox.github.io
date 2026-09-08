@@ -213,7 +213,15 @@ function navigateToPage(page) {
 }
 
 // --- Pagination variables ---
-const ITEMS_PER_PAGE = 9;
+// 4 cards/page below the `lg` breakpoint (mobile/tablet, 1–2 columns),
+// 6 cards/page at `lg` and up (desktop, 3 columns) — matches the
+// row-cols-1 / row-cols-md-2 / row-cols-lg-3 classes on #projectsGrid.
+const LG_BREAKPOINT = 992;
+function getItemsPerPage() {
+  return window.innerWidth < LG_BREAKPOINT ? 4 : 6;
+}
+
+let ITEMS_PER_PAGE = getItemsPerPage();
 let currentPage = 1;
 
 function getTotalPages() {
@@ -225,19 +233,30 @@ function renderProjects(page) {
   const start = (page - 1) * ITEMS_PER_PAGE;
   const slice = projectIds.slice(start, start + ITEMS_PER_PAGE);
 
+  // Build cards first WITHOUT a real src, so no request fires yet
   grid.innerHTML = slice.map(id => `
     <div class="col">
       <div class="multimedia-card">
         <div class="ratio ratio-16x9" style="overflow: hidden;">
           <iframe 
-            src="https://www.behance.net/embed/project/${id}?ilo0=1" 
+            data-src="https://www.behance.net/embed/project/${id}?ilo0=1" 
             allowfullscreen
+            loading="lazy"
             style="border: 0; width: 110%; height: 108%; margin: 0 0 -8% -5%;"
           ></iframe>
         </div>
       </div>
     </div>
   `).join('');
+
+  // Stagger each iframe's real src 250ms apart so we don't fire
+  // 9 simultaneous cross-origin requests (Behance's bot protection
+  // was returning 403s on that burst pattern).
+  grid.querySelectorAll('iframe[data-src]').forEach((iframe, i) => {
+    setTimeout(() => {
+      iframe.src = iframe.dataset.src;
+    }, i * 250);
+  });
 }
 
 function renderPagination(page) {
@@ -324,16 +343,22 @@ function renderPagination(page) {
 
 // --- Initialise ---
 buildGoToModal();
-renderProjects(currentPage);
 renderPagination(currentPage);
+// renderProjects() is now called on first expand (see collapse listener below),
+// not here — so we don't fire 9 Behance requests before the section is even opened.
 
 // --- Collapsible icon rotation ---
 const multimediaCollapseEl = document.getElementById('multimediaCollapse');
 const multimediaToggleBtn = document.querySelector('[data-bs-target="#multimediaCollapse"]');
 const multimediaIcon = document.getElementById('multimediaIcon');
 
+let projectsLoaded = false;
 multimediaCollapseEl.addEventListener('show.bs.collapse', () => {
   multimediaIcon.style.transform = 'rotate(180deg)';
+  if (!projectsLoaded) {
+    renderProjects(currentPage);
+    projectsLoaded = true;
+  }
 });
 multimediaCollapseEl.addEventListener('hide.bs.collapse', () => {
   multimediaIcon.style.transform = 'rotate(0deg)';
@@ -344,4 +369,29 @@ multimediaToggleBtn.addEventListener('mouseover', () => {
 });
 multimediaToggleBtn.addEventListener('mouseout', () => {
   multimediaToggleBtn.style.backgroundColor = 'transparent';
+});
+
+// --- Responsive items-per-page ---
+// Re-check on resize (debounced) so rotating a tablet or resizing a
+// browser window switches between 6/page and 9/page correctly.
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    const newItemsPerPage = getItemsPerPage();
+    if (newItemsPerPage === ITEMS_PER_PAGE) return; // breakpoint didn't change
+
+    ITEMS_PER_PAGE = newItemsPerPage;
+    currentPage = 1;
+
+    // Rebuild the "Go to page" modal so its max page / counter stay correct
+    const oldModal = document.getElementById('goToPageModal');
+    if (oldModal) oldModal.remove();
+    buildGoToModal();
+
+    renderPagination(currentPage);
+    if (projectsLoaded) {
+      renderProjects(currentPage);
+    }
+  }, 200);
 });

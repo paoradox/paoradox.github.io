@@ -155,7 +155,14 @@
   };
 
   const repoEntries = Object.entries(repos);
-  const ITEMS_PER_PAGE = 9;
+  // 4 cards/page below the `lg` breakpoint (mobile/tablet, 1–2 columns),
+  // 6 cards/page at `lg` and up (desktop, 3 columns) — matches the
+  // row-cols-1 / row-cols-md-2 / row-cols-lg-3 classes on #reposGrid.
+  const LG_BREAKPOINT = 992;
+  function getItemsPerPage() {
+    return window.innerWidth < LG_BREAKPOINT ? 4 : 6;
+  }
+  let ITEMS_PER_PAGE = getItemsPerPage();
   let currentPage = 1;
 
   function getTotalPages() {
@@ -364,5 +371,28 @@
   });
   techToggleBtn.addEventListener('mouseout', () => {
     techToggleBtn.style.backgroundColor = 'transparent';
+  });
+
+  // --- Responsive items-per-page ---
+  // Re-check on resize (debounced) so rotating a tablet or resizing a
+  // browser window switches between 4/page and 6/page correctly.
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const newItemsPerPage = getItemsPerPage();
+      if (newItemsPerPage === ITEMS_PER_PAGE) return; // breakpoint didn't change
+
+      ITEMS_PER_PAGE = newItemsPerPage;
+      currentPage = 1;
+
+      // Rebuild the "Go to page" modal so its max page / counter stay correct
+      const oldModal = document.getElementById('goToPageModalTech');
+      if (oldModal) oldModal.remove();
+      buildGoToModalTech();
+
+      renderRepos(currentPage);
+      renderPagination(currentPage);
+    }, 200);
   });
 })();
