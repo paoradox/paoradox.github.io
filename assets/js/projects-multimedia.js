@@ -279,8 +279,13 @@ function renderPagination(page) {
     </li>
   `;
 
-  // First three pages
-  for (let i = 1; i <= Math.min(3, total); i++) {
+  // Sliding window of 3 pages that always includes the current page
+  // (e.g. page 4 -> shows 4,5,6 — not always 1,2,3)
+  const GROUP_SIZE = 3;
+  const groupStart = Math.floor((page - 1) / GROUP_SIZE) * GROUP_SIZE + 1;
+  const groupEnd = Math.min(groupStart + GROUP_SIZE - 1, total);
+
+  for (let i = groupStart; i <= groupEnd; i++) {
     html += `
       <li class="page-item ${i === page ? 'active' : ''}">
         <a class="page-link" href="#" data-page="${i}">${i}</a>
@@ -288,23 +293,24 @@ function renderPagination(page) {
     `;
   }
 
-  if (total > 4) {
-    // Ellipsis and last
-    html += `
-      <li class="page-item ellipsis-item">
-        <a class="page-link" href="#" id="ellipsisLink" aria-label="Go to page">…</a>
-      </li>
-      <li class="page-item ${total === page ? 'active' : ''}">
-        <a class="page-link" href="#" data-page="${total}">${total}</a>
-      </li>
-    `;
-  } else if (total > 3) {
-    // total === 4
-    html += `
-      <li class="page-item ${4 === page ? 'active' : ''}">
-        <a class="page-link" href="#" data-page="4">4</a>
-      </li>
-    `;
+  if (groupEnd < total) {
+    if (total - groupEnd === 1) {
+      // Only one page is hidden — just show it instead of an ellipsis
+      html += `
+        <li class="page-item">
+          <a class="page-link" href="#" data-page="${total}">${total}</a>
+        </li>
+      `;
+    } else {
+      html += `
+        <li class="page-item ellipsis-item">
+          <a class="page-link" href="#" id="ellipsisLink" aria-label="Go to page">…</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="#" data-page="${total}">${total}</a>
+        </li>
+      `;
+    }
   }
 
   // Next
