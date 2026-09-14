@@ -1,0 +1,471 @@
+/* ==========================================================================
+   NEUMORPHISM SKIN  —  assets/css/neumorphism-theme.css
+   --------------------------------------------------------------------------
+   Additive visual layer for JP Ancheta Javier's Portfolio.
+
+   • Pure CSS. No frameworks, no JS, no HTML structure changes.
+   • Load this file LAST in <head> (after bootstrap.min.css and every other
+     stylesheet) so it wins the cascade:
+         <link rel="stylesheet" href="assets/css/neumorphism-theme.css">
+   • Selectors are deliberately prefixed with `body` / `html body` so this
+     file outranks the !important rules that live inside the original
+     stylesheets and the runtime-injected <style> blocks (projects-*.js).
+   • Nothing here sets width/height/margin/padding/display on structural
+     elements, so the original layout is preserved 1:1.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+    /* Surfaces — tuned to the site's existing #131416 dark base */
+    --neu-bg:           #101114;
+    --neu-surface:      #17181b;
+    --neu-surface-hi:   #1c1d21;
+    --neu-surface-lo:   #141519;
+
+    /* The two light sources that make neumorphism work */
+    --neu-light:        rgba(255, 255, 255, 0.055);
+    --neu-light-soft:   rgba(255, 255, 255, 0.035);
+    --neu-dark:         rgba(0, 0, 0, 0.72);
+    --neu-dark-soft:    rgba(0, 0, 0, 0.55);
+
+    /* Accent — matches the site's existing terminal cyan (#02aaff) */
+    --neu-accent:       #02aaff;
+    --neu-accent-soft:  rgba(2, 170, 255, 0.28);
+
+    --neu-radius:       16px;
+    --neu-radius-sm:    10px;
+
+    /* Raised (convex) */
+    --neu-raised:
+        -5px -5px 12px var(--neu-light),
+         6px  6px 14px var(--neu-dark);
+
+    --neu-raised-sm:
+        -3px -3px 7px var(--neu-light-soft),
+         4px  4px 9px var(--neu-dark-soft);
+
+    /* Pressed (concave / inset) */
+    --neu-inset:
+        inset -4px -4px 9px var(--neu-light-soft),
+        inset  5px  5px 12px var(--neu-dark);
+
+    --neu-inset-sm:
+        inset -2px -2px 5px var(--neu-light-soft),
+        inset  3px  3px 7px var(--neu-dark-soft);
+
+    /* Hover lift */
+    --neu-hover:
+        -6px -6px 15px rgba(255, 255, 255, 0.070),
+         7px  7px 18px rgba(0, 0, 0, 0.78);
+
+    --neu-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+
+/* --------------------------------------------------------------------------
+   2. PAGE CANVAS
+   -------------------------------------------------------------------------- */
+body {
+    background-color: var(--neu-bg);
+    background-image:
+        radial-gradient(1100px 550px at 12% -8%,  rgba(255, 255, 255, 0.035), transparent 62%),
+        radial-gradient(900px  480px at 108% 4%,  rgba(2, 170, 255, 0.055),   transparent 58%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Soft depth under the hero image */
+header {
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.66);
+}
+
+/* Recessed "terminal strip" behind the subtitle */
+body .text-badge {
+    background: rgba(12, 13, 16, 0.72);
+    border-radius: var(--neu-radius-sm);
+    box-shadow: var(--neu-inset-sm), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* --------------------------------------------------------------------------
+   3. COLLAPSIBLE SECTION HEADERS  (Multimedia / Tech toggles)
+   -------------------------------------------------------------------------- */
+body .btn[data-bs-toggle="collapse"] {
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow: var(--neu-raised);
+    transition:
+        box-shadow 0.28s var(--neu-ease),
+        background-color 0.28s var(--neu-ease),
+        color 0.28s var(--neu-ease);
+}
+
+/* Expanded = pressed into the surface */
+body .btn[data-bs-toggle="collapse"]:not(.collapsed) {
+    background-color: var(--neu-surface-lo) !important;
+    box-shadow: var(--neu-inset);
+}
+
+body .btn[data-bs-toggle="collapse"]:hover {
+    background-color: var(--neu-surface-hi) !important;
+    box-shadow: var(--neu-hover);
+}
+
+body .btn[data-bs-toggle="collapse"]:not(.collapsed):hover {
+    background-color: var(--neu-surface-lo) !important;
+    box-shadow: var(--neu-inset);
+}
+
+body .btn[data-bs-toggle="collapse"]:focus-visible {
+    outline: none;
+    box-shadow: var(--neu-raised), 0 0 0 3px var(--neu-accent-soft);
+}
+
+body .btn[data-bs-toggle="collapse"]:not(.collapsed):focus-visible {
+    box-shadow: var(--neu-inset), 0 0 0 3px var(--neu-accent-soft);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. PROJECT CARDS
+   -------------------------------------------------------------------------- */
+body .tech-card,
+body .multimedia-card {
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow: var(--neu-raised);
+    transition:
+        box-shadow 0.3s var(--neu-ease),
+        transform 0.3s var(--neu-ease),
+        background-color 0.3s var(--neu-ease);
+}
+
+body .tech-card:hover,
+body .multimedia-card:hover {
+    border-color: transparent !important;
+    background-color: var(--neu-surface-hi) !important;
+    box-shadow: var(--neu-hover);
+}
+
+/* Keep the embedded Behance frame flush with the rounded shell */
+body .multimedia-card .ratio {
+    border-radius: calc(var(--neu-radius) - 6px);
+}
+
+/* Card title gets a hairline emboss instead of a flat glyph */
+body .tech-card .card-title {
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
+}
+
+
+/* --------------------------------------------------------------------------
+   5. BUTTONS INSIDE CARDS
+   -------------------------------------------------------------------------- */
+body .tech-card .btn-outline-primary {
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius-sm) !important;
+    color: var(--neu-accent) !important;
+    box-shadow: var(--neu-raised-sm);
+    transition:
+        box-shadow 0.25s var(--neu-ease),
+        background-color 0.25s var(--neu-ease),
+        color 0.25s var(--neu-ease);
+}
+
+body .tech-card .btn-outline-primary:hover,
+body .tech-card .btn-outline-primary:focus {
+    background-color: var(--neu-surface-lo) !important;
+    border-color: transparent !important;
+    color: var(--neu-accent) !important;
+    box-shadow: var(--neu-inset-sm);
+}
+
+body .tech-card .btn-outline-primary:active {
+    background-color: var(--neu-surface-lo) !important;
+    box-shadow: var(--neu-inset-sm);
+}
+
+
+/* --------------------------------------------------------------------------
+   6. PAGINATION
+   -------------------------------------------------------------------------- */
+body .pagination .page-item .page-link {
+    margin: 0 4px !important;
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius-sm) !important;
+    color: #c8ced8 !important;
+    box-shadow: var(--neu-raised-sm);
+    transition:
+        box-shadow 0.22s var(--neu-ease),
+        background-color 0.22s var(--neu-ease),
+        color 0.22s var(--neu-ease);
+}
+
+body .pagination .page-item .page-link:hover {
+    background-color: var(--neu-surface-hi) !important;
+    color: var(--neu-accent) !important;
+    box-shadow: var(--neu-hover);
+}
+
+body .pagination .page-item .page-link:focus {
+    outline: none;
+    box-shadow: var(--neu-raised-sm), 0 0 0 3px var(--neu-accent-soft);
+}
+
+/* Current page — pushed in */
+body .pagination .page-item.active .page-link {
+    background-color: var(--neu-surface-lo) !important;
+    color: var(--neu-accent) !important;
+    box-shadow: var(--neu-inset-sm);
+}
+
+/* Ellipsis link — reads as a groove */
+body .pagination .ellipsis-item .page-link {
+    background-color: var(--neu-surface-lo) !important;
+    color: #7b8290 !important;
+    box-shadow: var(--neu-inset-sm);
+}
+
+/* Disabled arrows — flat and quiet */
+body .pagination .page-item.disabled .page-link {
+    background-color: var(--neu-surface-lo) !important;
+    color: rgba(255, 255, 255, 0.20) !important;
+    box-shadow: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   7. TOOLS MARQUEE
+   -------------------------------------------------------------------------- */
+body .marquee-wrapper {
+    background-color: var(--neu-surface-lo);
+    border-color: transparent !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow: var(--neu-inset);
+}
+
+body .marquee-icon {
+    filter: grayscale(20%) brightness(0.9)
+            drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.65));
+}
+
+body .marquee-icon:hover {
+    filter: grayscale(0%) brightness(1.1)
+            drop-shadow(0 0 8px rgba(2, 170, 255, 0.65));
+}
+
+
+/* --------------------------------------------------------------------------
+   8. MODALS  (Go-to-page — Multimedia & Tech)
+   -------------------------------------------------------------------------- */
+body .dark-modal .modal-content {
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow:
+        -8px -8px 24px rgba(255, 255, 255, 0.045),
+        16px  16px 44px rgba(0, 0, 0, 0.88) !important;
+}
+
+body .dark-modal .modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+body .dark-modal .form-control {
+    background-color: var(--neu-surface-lo) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius-sm) !important;
+    color: #f0f0f0 !important;
+    box-shadow: var(--neu-inset-sm) !important;
+}
+
+body .dark-modal .form-control:focus {
+    border-color: transparent !important;
+    box-shadow: var(--neu-inset-sm), 0 0 0 3px var(--neu-accent-soft) !important;
+}
+
+body .dark-modal .page-counter {
+    background-color: var(--neu-surface-lo) !important;
+    border-color: transparent !important;
+    color: #7b8290 !important;
+    box-shadow: var(--neu-inset-sm) !important;
+}
+
+body .dark-modal .btn-outline-secondary {
+    background-color: var(--neu-surface) !important;
+    border-color: transparent !important;
+    color: #b9bfc9 !important;
+    box-shadow: var(--neu-raised-sm) !important;
+    transition: box-shadow 0.22s var(--neu-ease), color 0.22s var(--neu-ease);
+}
+
+body .dark-modal .btn-outline-secondary:hover {
+    background-color: var(--neu-surface-hi) !important;
+    color: var(--neu-accent) !important;
+    box-shadow: var(--neu-inset-sm) !important;
+}
+
+body .dark-modal .btn-primary {
+    background-color: var(--neu-accent) !important;
+    border-color: transparent !important;
+    color: #04121b !important;
+    box-shadow:
+        0 6px 16px rgba(2, 170, 255, 0.28),
+        inset -2px -2px 6px rgba(0, 0, 0, 0.35),
+        inset  2px  2px 6px rgba(255, 255, 255, 0.28) !important;
+    transition: box-shadow 0.22s var(--neu-ease), background-color 0.22s var(--neu-ease);
+}
+
+body .dark-modal .btn-primary:hover {
+    background-color: #0296e0 !important;
+    box-shadow:
+        0 4px 12px rgba(2, 170, 255, 0.36),
+        inset  3px  3px 8px rgba(0, 0, 0, 0.40) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   9. GREETINGS OVERLAY
+   -------------------------------------------------------------------------- */
+body .greetings-overlay {
+    background: rgba(19, 20, 22, 0.88) !important;
+    border-color: transparent !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow:
+        var(--neu-raised),
+        0 0 0 1px rgba(255, 255, 255, 0.045) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+body .greetings-overlay:hover {
+    border-color: transparent !important;
+    box-shadow:
+        var(--neu-hover),
+        0 0 0 1px var(--neu-accent-soft) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   10. FOOTER
+   -------------------------------------------------------------------------- */
+body footer {
+    background-color: var(--neu-surface) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 -12px 32px rgba(0, 0, 0, 0.60);
+}
+
+
+/* --------------------------------------------------------------------------
+   11. SOCIAL ICONS  (inline SVG-free — safe, non-structural)
+   -------------------------------------------------------------------------- */
+body .list-inline-item a i {
+    filter:
+        drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.85))
+        drop-shadow(-1px -1px 2px rgba(255, 255, 255, 0.07));
+    transition: filter 0.25s var(--neu-ease), transform 0.25s var(--neu-ease);
+}
+
+body .list-inline-item a:hover i,
+body .list-inline-item a:focus-visible i {
+    filter: drop-shadow(0 0 9px rgba(2, 170, 255, 0.70));
+    transform: translateY(-2px);
+}
+
+
+/* --------------------------------------------------------------------------
+   12. SCROLLBAR + TEXT SELECTION
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--neu-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--neu-surface-hi);
+    border: 3px solid var(--neu-bg);
+    border-radius: 8px;
+    box-shadow: var(--neu-inset-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #24252a;
+}
+
+::selection {
+    background: var(--neu-accent);
+    color: #04121b;
+}
+
+
+/* --------------------------------------------------------------------------
+   13. OPTIONAL UTILITY CLASSES
+   --------------------------------------------------------------------------
+   Purely opt-in. Add these to any element in index.html if you ever want a
+   neumorphic shell on something that isn't covered above. Because they are
+   new class names, they cannot collide with existing styles.
+   -------------------------------------------------------------------------- */
+.neu-raised {
+    background-color: var(--neu-surface);
+    border-radius: var(--neu-radius);
+    box-shadow: var(--neu-raised);
+}
+
+.neu-raised-sm {
+    background-color: var(--neu-surface);
+    border-radius: var(--neu-radius-sm);
+    box-shadow: var(--neu-raised-sm);
+}
+
+.neu-inset {
+    background-color: var(--neu-surface-lo);
+    border-radius: var(--neu-radius);
+    box-shadow: var(--neu-inset);
+}
+
+.neu-inset-sm {
+    background-color: var(--neu-surface-lo);
+    border-radius: var(--neu-radius-sm);
+    box-shadow: var(--neu-inset-sm);
+}
+
+.neu-flat {
+    background-color: var(--neu-surface);
+    border-radius: var(--neu-radius);
+}
+
+
+/* --------------------------------------------------------------------------
+   14. ACCESSIBILITY — honour reduced-motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    body .btn[data-bs-toggle="collapse"],
+    body .tech-card,
+    body .multimedia-card,
+    body .tech-card .btn-outline-primary,
+    body .pagination .page-item .page-link,
+    body .dark-modal .btn-outline-secondary,
+    body .dark-modal .btn-primary,
+    body .list-inline-item a i {
+        transition: none !important;
+    }
+
+    body .list-inline-item a:hover i,
+    body .list-inline-item a:focus-visible i {
+        transform: none;
+    }
+}

@@ -1,0 +1,562 @@
+/* ==========================================================================
+   GLASSMORPHISM SKIN  —  assets/css/glassmorphism-theme.css
+   --------------------------------------------------------------------------
+   Additive visual layer for JP Ancheta Javier's Portfolio.
+
+   • Pure CSS. No frameworks, no JS, no HTML structure changes.
+   • Load this file LAST in <head> (after bootstrap.min.css and every other
+     stylesheet) so it wins the cascade:
+         <link rel="stylesheet" href="assets/css/glassmorphism-theme.css">
+   • Selectors are prefixed with `body` so this file outranks the !important
+     rules inside the original stylesheets and the runtime-injected <style>
+     blocks (projects-multimedia.js / projects-it.js).
+   • Nothing here sets width/height/margin/padding/display/position on
+     structural elements, so the original layout is preserved 1:1.
+   • The frosted look needs something colourful BEHIND the glass, so the page
+     backdrop gets vivid fixed gradients. Those are decorative only and use
+     no extra DOM nodes.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+    /* Glass fill + edge */
+    --glass-bg:          rgba(255, 255, 255, 0.055);
+    --glass-bg-strong:   rgba(255, 255, 255, 0.085);
+    --glass-bg-deep:     rgba(255, 255, 255, 0.030);
+    --glass-edge:        rgba(255, 255, 255, 0.14);
+    --glass-edge-soft:   rgba(255, 255, 255, 0.08);
+    --glass-edge-bright: rgba(255, 255, 255, 0.28);
+
+    /* Blur strengths */
+    --glass-blur:        16px;
+    --glass-blur-lg:     26px;
+    --glass-blur-sm:     10px;
+    --glass-saturate:    165%;
+
+    /* Shadows */
+    --glass-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.42),
+        0 1px 2px rgba(0, 0, 0, 0.22);
+    --glass-shadow-lg:
+        0 20px 60px rgba(0, 0, 0, 0.60),
+        0 2px 6px rgba(0, 0, 0, 0.30);
+    --glass-shadow-sm:
+        0 4px 16px rgba(0, 0, 0, 0.34);
+    --glass-inset-hi:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+
+    /* Accent — matches the site's terminal cyan (#02aaff) */
+    --glass-accent:      #02aaff;
+    --glass-accent-soft: rgba(2, 170, 255, 0.30);
+
+    --glass-radius:      16px;
+    --glass-radius-sm:   10px;
+    --glass-ease:        cubic-bezier(.22, .61, .36, 1);
+}
+
+
+/* --------------------------------------------------------------------------
+   2. PAGE BACKDROP
+   --------------------------------------------------------------------------
+   Static, fixed colour fields. No DOM changes, no layout impact — they just
+   give the frosted panels something to refract.
+   -------------------------------------------------------------------------- */
+body {
+    background-color: #0b0d12;
+    background-image:
+        /* Cyan bloom, top-left */
+        radial-gradient(760px 520px at 8% 2%,
+            rgba(2, 170, 255, 0.30), transparent 62%),
+        /* Violet bloom, top-right */
+        radial-gradient(820px 560px at 96% 6%,
+            rgba(120, 70, 255, 0.28), transparent 64%),
+        /* Magenta bloom, mid-left */
+        radial-gradient(640px 640px at 2% 62%,
+            rgba(255, 60, 172, 0.16), transparent 62%),
+        /* Teal bloom, bottom-right */
+        radial-gradient(760px 560px at 98% 88%,
+            rgba(0, 224, 190, 0.18), transparent 64%),
+        /* Deep blue base wash */
+        radial-gradient(1200px 900px at 50% 50%,
+            rgba(28, 61, 202, 0.16), transparent 70%),
+        linear-gradient(180deg, #0c0e14 0%, #0a0c11 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. HERO
+   -------------------------------------------------------------------------- */
+header {
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.62);
+}
+
+/* Frosted plate behind the terminal-style subtitle */
+body .text-badge {
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--glass-radius-sm);
+    box-shadow: var(--glass-shadow-sm), var(--glass-inset-hi);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. COLLAPSIBLE SECTION HEADERS  (Multimedia / Tech toggles)
+   -------------------------------------------------------------------------- */
+body .btn[data-bs-toggle="collapse"] {
+    background-color: var(--glass-bg) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi);
+    transition:
+        background-color 0.30s var(--glass-ease),
+        border-color 0.30s var(--glass-ease),
+        box-shadow 0.30s var(--glass-ease);
+}
+
+/* Expanded — glass thickens and the edge catches more light */
+body .btn[data-bs-toggle="collapse"]:not(.collapsed) {
+    background-color: var(--glass-bg-strong) !important;
+    border-color: var(--glass-edge-bright) !important;
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi);
+}
+
+body .btn[data-bs-toggle="collapse"]:hover {
+    background-color: var(--glass-bg-strong) !important;
+    border-color: var(--glass-edge-bright) !important;
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi);
+}
+
+body .btn[data-bs-toggle="collapse"]:focus-visible {
+    outline: none;
+    border-color: var(--glass-accent) !important;
+    box-shadow: var(--glass-shadow), 0 0 0 3px var(--glass-accent-soft);
+}
+
+
+/* --------------------------------------------------------------------------
+   5. PROJECT CARDS
+   -------------------------------------------------------------------------- */
+body .tech-card,
+body .multimedia-card {
+    background-color: var(--glass-bg) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-soft) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi);
+    transition:
+        background-color 0.32s var(--glass-ease),
+        border-color 0.32s var(--glass-ease),
+        box-shadow 0.32s var(--glass-ease),
+        transform 0.32s var(--glass-ease);
+}
+
+body .tech-card:hover,
+body .multimedia-card:hover {
+    background-color: var(--glass-bg-strong) !important;
+    border-color: var(--glass-edge-bright) !important;
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi);
+    transform: translateY(-3px);
+}
+
+/* Keep the embedded Behance frame flush with the rounded glass shell */
+body .multimedia-card .ratio {
+    border-radius: calc(var(--glass-radius) - 6px);
+    overflow: hidden;
+}
+
+/* Subtle emboss on card titles so they read on frosted surfaces */
+body .tech-card .card-title {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+
+/* --------------------------------------------------------------------------
+   6. BUTTONS INSIDE CARDS
+   -------------------------------------------------------------------------- */
+body .tech-card .btn-outline-primary {
+    background-color: rgba(255, 255, 255, 0.045) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge) !important;
+    border-radius: var(--glass-radius-sm) !important;
+    color: var(--glass-accent) !important;
+    box-shadow: var(--glass-shadow-sm), var(--glass-inset-hi);
+    transition:
+        background-color 0.25s var(--glass-ease),
+        border-color 0.25s var(--glass-ease),
+        box-shadow 0.25s var(--glass-ease),
+        color 0.25s var(--glass-ease);
+}
+
+body .tech-card .btn-outline-primary:hover,
+body .tech-card .btn-outline-primary:focus {
+    background-color: rgba(2, 170, 255, 0.18) !important;
+    border-color: var(--glass-accent) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 0 0 3px var(--glass-accent-soft),
+        var(--glass-shadow-sm),
+        var(--glass-inset-hi);
+}
+
+
+/* --------------------------------------------------------------------------
+   7. PAGINATION
+   -------------------------------------------------------------------------- */
+body .pagination .page-item .page-link {
+    margin: 0 4px !important;
+    background-color: var(--glass-bg) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-soft) !important;
+    border-radius: var(--glass-radius-sm) !important;
+    color: #cfd6e2 !important;
+    box-shadow: var(--glass-shadow-sm), var(--glass-inset-hi);
+    transition:
+        background-color 0.22s var(--glass-ease),
+        border-color 0.22s var(--glass-ease),
+        box-shadow 0.22s var(--glass-ease),
+        color 0.22s var(--glass-ease);
+}
+
+body .pagination .page-item .page-link:hover {
+    background-color: var(--glass-bg-strong) !important;
+    border-color: var(--glass-edge-bright) !important;
+    color: #ffffff !important;
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi);
+}
+
+body .pagination .page-item .page-link:focus {
+    outline: none;
+    box-shadow: var(--glass-shadow-sm), 0 0 0 3px var(--glass-accent-soft);
+}
+
+/* Current page — glowing cyan pane */
+body .pagination .page-item.active .page-link {
+    background-color: rgba(2, 170, 255, 0.22) !important;
+    border-color: var(--glass-accent) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 0 0 3px var(--glass-accent-soft),
+        var(--glass-shadow-sm),
+        var(--glass-inset-hi);
+}
+
+/* Ellipsis link */
+body .pagination .ellipsis-item .page-link {
+    background-color: var(--glass-bg-deep) !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+/* Disabled arrows */
+body .pagination .page-item.disabled .page-link {
+    background-color: var(--glass-bg-deep) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.22) !important;
+    box-shadow: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. TOOLS MARQUEE
+   -------------------------------------------------------------------------- */
+body .marquee-wrapper {
+    background-color: var(--glass-bg-deep) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-soft) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi);
+}
+
+body .marquee-icon {
+    filter: grayscale(20%) brightness(0.95)
+            drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
+body .marquee-icon:hover {
+    filter: grayscale(0%) brightness(1.12)
+            drop-shadow(0 0 10px rgba(2, 170, 255, 0.70));
+}
+
+
+/* --------------------------------------------------------------------------
+   9. MODALS  (Go-to-page — Multimedia & Tech)
+   -------------------------------------------------------------------------- */
+body .modal-backdrop.show {
+    opacity: 0.62;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+body .dark-modal .modal-content {
+    background-color: rgba(18, 20, 26, 0.72) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-bright) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi) !important;
+    color: #e8ecf3 !important;
+}
+
+body .dark-modal .modal-header {
+    border-bottom: 1px solid var(--glass-edge-soft) !important;
+}
+
+body .dark-modal .form-control {
+    background-color: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid var(--glass-edge) !important;
+    border-radius: var(--glass-radius-sm) !important;
+    color: #f2f5fa !important;
+    box-shadow: var(--glass-inset-hi) !important;
+}
+
+body .dark-modal .form-control:focus {
+    border-color: var(--glass-accent) !important;
+    box-shadow: 0 0 0 3px var(--glass-accent-soft) !important;
+}
+
+body .dark-modal .page-counter {
+    background-color: rgba(255, 255, 255, 0.035) !important;
+    border: 1px solid var(--glass-edge-soft) !important;
+    border-left: none !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    box-shadow: var(--glass-inset-hi) !important;
+}
+
+body .dark-modal .btn-outline-secondary {
+    background-color: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid var(--glass-edge) !important;
+    border-radius: var(--glass-radius-sm) !important;
+    color: #c8d0dc !important;
+    box-shadow: var(--glass-inset-hi) !important;
+    transition:
+        background-color 0.22s var(--glass-ease),
+        border-color 0.22s var(--glass-ease),
+        color 0.22s var(--glass-ease);
+}
+
+body .dark-modal .btn-outline-secondary:hover {
+    background-color: rgba(2, 170, 255, 0.18) !important;
+    border-color: var(--glass-accent) !important;
+    color: #ffffff !important;
+}
+
+body .dark-modal .btn-primary {
+    background-color: rgba(2, 170, 255, 0.85) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    border-radius: var(--glass-radius-sm) !important;
+    color: #04121b !important;
+    box-shadow:
+        0 6px 20px rgba(2, 170, 255, 0.35),
+        var(--glass-inset-hi) !important;
+    transition:
+        background-color 0.22s var(--glass-ease),
+        box-shadow 0.22s var(--glass-ease);
+}
+
+body .dark-modal .btn-primary:hover {
+    background-color: rgba(2, 170, 255, 1) !important;
+    box-shadow:
+        0 4px 26px rgba(2, 170, 255, 0.55),
+        var(--glass-inset-hi) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   10. GREETINGS OVERLAY
+   -------------------------------------------------------------------------- */
+body .greetings-overlay {
+    background: rgba(18, 20, 26, 0.55) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate)) !important;
+    backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate)) !important;
+    border: 1px solid var(--glass-edge) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi) !important;
+}
+
+body .greetings-overlay:hover {
+    border-color: var(--glass-edge-bright) !important;
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   11. FOOTER
+   -------------------------------------------------------------------------- */
+body footer {
+    background-color: rgba(255, 255, 255, 0.035) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border-top: 1px solid var(--glass-edge-soft);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 -14px 40px rgba(0, 0, 0, 0.50);
+}
+
+
+/* --------------------------------------------------------------------------
+   12. SOCIAL ICONS
+   -------------------------------------------------------------------------- */
+body .list-inline-item a i {
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.60));
+    transition: filter 0.25s var(--glass-ease), transform 0.25s var(--glass-ease);
+}
+
+body .list-inline-item a:hover i,
+body .list-inline-item a:focus-visible i {
+    filter: drop-shadow(0 0 10px rgba(2, 170, 255, 0.85));
+    transform: translateY(-2px);
+}
+
+
+/* --------------------------------------------------------------------------
+   13. SCROLLBAR + TEXT SELECTION
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.16);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.28);
+}
+
+::selection {
+    background: var(--glass-accent);
+    color: #04121b;
+}
+
+
+/* --------------------------------------------------------------------------
+   14. OPTIONAL UTILITY CLASSES
+   --------------------------------------------------------------------------
+   Purely opt-in. Add these to any element in index.html if you ever want a
+   glass shell on something not covered above. New class names, so they
+   cannot collide with existing styles.
+   -------------------------------------------------------------------------- */
+.glass {
+    background-color: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--glass-radius);
+    box-shadow: var(--glass-shadow), var(--glass-inset-hi);
+}
+
+.glass-strong {
+    background-color: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-bright);
+    border-radius: var(--glass-radius);
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi);
+}
+
+.glass-subtle {
+    background-color: var(--glass-bg-deep);
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-edge-soft);
+    border-radius: var(--glass-radius-sm);
+    box-shadow: var(--glass-shadow-sm), var(--glass-inset-hi);
+}
+
+.glass-hover {
+    transition:
+        background-color 0.30s var(--glass-ease),
+        border-color 0.30s var(--glass-ease),
+        box-shadow 0.30s var(--glass-ease),
+        transform 0.30s var(--glass-ease);
+}
+
+.glass-hover:hover {
+    background-color: var(--glass-bg-strong);
+    border-color: var(--glass-edge-bright);
+    box-shadow: var(--glass-shadow-lg), var(--glass-inset-hi);
+    transform: translateY(-2px);
+}
+
+.glass-accent {
+    border-color: var(--glass-accent);
+    box-shadow:
+        0 0 0 3px var(--glass-accent-soft),
+        var(--glass-shadow),
+        var(--glass-inset-hi);
+}
+
+
+/* --------------------------------------------------------------------------
+   15. GRACEFUL FALLBACK
+   --------------------------------------------------------------------------
+   Browsers without backdrop-filter (older Firefox, some embedded webviews)
+   get a denser translucent fill so text stays legible without the blur.
+   -------------------------------------------------------------------------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    body .btn[data-bs-toggle="collapse"],
+    body .tech-card,
+    body .multimedia-card,
+    body .marquee-wrapper,
+    body .greetings-overlay,
+    body footer,
+    .glass,
+    .glass-strong,
+    .glass-subtle {
+        background-color: rgba(24, 27, 34, 0.88) !important;
+    }
+
+    body .dark-modal .modal-content {
+        background-color: rgba(20, 22, 28, 0.96) !important;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   16. ACCESSIBILITY — honour reduced-motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    body .btn[data-bs-toggle="collapse"],
+    body .tech-card,
+    body .multimedia-card,
+    body .tech-card .btn-outline-primary,
+    body .pagination .page-item .page-link,
+    body .dark-modal .btn-outline-secondary,
+    body .dark-modal .btn-primary,
+    body .list-inline-item a i,
+    .glass-hover {
+        transition: none !important;
+    }
+
+    body .tech-card:hover,
+    body .multimedia-card:hover,
+    body .list-inline-item a:hover i,
+    body .list-inline-item a:focus-visible i,
+    .glass-hover:hover {
+        transform: none;
+    }
+}
