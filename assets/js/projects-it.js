@@ -115,7 +115,6 @@
   const repos = {
     "JS-Portable-DTR-LAN": "DTR Manager: Portable DTR System", 
     "JS-Portable-Queue-LAN": "Queue Manager: Portable Queueing System", 
-    "JS-README-Builder": "README Builder: Markdown Editor App",
     "Python-Pynal-Destination": "Pynal Destination: Location History Recorder App",
     "Python-Video-Downloader": "Youtube Playlist Downloader",
     "QoL-Scripts": "Quality of Life (QoL) Scripts",
